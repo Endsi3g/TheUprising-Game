@@ -235,3 +235,17 @@ export interface TenantAnalytics {
     avg_session_duration_ms: number;
     email_collection_rate: number;
 }
+
+// ─── Catalogue ────────────────────────────────────────────────────────────────
+
+export interface CatalogueItem {
+    id: string; // or slug
+    title: string;
+    excerpt: string;
+    description?: string;
+    image_url?: string;
+    url: string; // The link to the actual publication/details
+    tags?: string[];
+    date?: string;
+    featured?: boolean;
+}

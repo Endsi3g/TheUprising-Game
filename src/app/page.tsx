@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { LayoutGrid, BrainCircuit, ArrowRight, MousePointerClick, Moon, Sun } from 'lucide-react';
+import { LayoutGrid, BrainCircuit, ArrowRight, MousePointerClick, Moon, Sun, Settings } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -28,7 +28,7 @@ export default function Home() {
           <div className="text-center space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
               Bonjour ! <br />
-              Prêt pour votre audit ?
+              Prêt à commencer ?
             </h1>
             <p className="text-lg text-gray-500 dark:text-gray-400 font-light max-w-lg mx-auto">
               Sélectionnez une option ci-dessous pour commencer votre expérience interactive.
@@ -39,7 +39,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mt-8">
 
             {/* Portfolio Card */}
-            <Link href="/portfolio" className="group flex flex-col items-start p-8 bg-white dark:bg-background-dark border border-border-light dark:border-border-dark rounded-xl shadow-soft hover:shadow-hover text-left focus:outline-none transition-all duration-200 hover:-translate-y-0.5">
+            <Link href="/portfolio" className="group flex flex-col items-start p-8 bg-white dark:bg-background-dark border border-border-light dark:border-border-dark rounded-xl shadow-soft hover:shadow-hover text-left focus:outline-none transition-all duration-300 hover:-translate-y-1 hover:border-black dark:hover:border-white">
               <div className="p-3 bg-gray-50 dark:bg-surface-dark rounded-lg mb-4 group-hover:bg-black group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-colors duration-300">
                 <LayoutGrid className="w-8 h-8" />
               </div>
@@ -47,13 +47,13 @@ export default function Home() {
               <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                 Explorez notre portfolio et nos études de cas récentes.
               </p>
-              <div className="mt-6 flex items-center text-sm font-medium text-gray-900 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
+              <div className="mt-6 flex items-center text-sm font-medium text-gray-900 dark:text-white opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
                 Explorer <ArrowRight className="ml-1 w-4 h-4" />
               </div>
             </Link>
 
             {/* Audit Card */}
-            <Link href="/audit" className="group flex flex-col items-start p-8 bg-white dark:bg-background-dark border border-border-light dark:border-border-dark rounded-xl shadow-soft hover:shadow-hover text-left focus:outline-none transition-all duration-200 hover:-translate-y-0.5">
+            <Link href="/game/audit" className="group flex flex-col items-start p-8 bg-white dark:bg-background-dark border border-border-light dark:border-border-dark rounded-xl shadow-soft hover:shadow-hover text-left focus:outline-none transition-all duration-300 hover:-translate-y-1 hover:border-black dark:hover:border-white">
               <div className="p-3 bg-gray-50 dark:bg-surface-dark rounded-lg mb-4 group-hover:bg-black group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-colors duration-300">
                 <BrainCircuit className="w-8 h-8" />
               </div>
@@ -61,13 +61,13 @@ export default function Home() {
               <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                 Analysez vos besoins avec notre assistant intelligent.
               </p>
-              <div className="mt-6 flex items-center text-sm font-medium text-gray-900 dark:text-white opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
+              <div className="mt-6 flex items-center text-sm font-medium text-gray-900 dark:text-white opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
                 Commencer <ArrowRight className="ml-1 w-4 h-4" />
               </div>
             </Link>
 
             {/* Start Business Card */}
-            <Link href="/start" className="group flex flex-col items-start p-8 bg-white dark:bg-background-dark border border-border-light dark:border-border-dark rounded-xl shadow-soft hover:shadow-hover text-left focus:outline-none transition-all duration-200 hover:-translate-y-0.5 md:col-span-2">
+            <Link href="/game/startup" className="group flex flex-col items-start p-8 bg-white dark:bg-background-dark border border-border-light dark:border-border-dark rounded-xl shadow-soft hover:shadow-hover text-left focus:outline-none transition-all duration-300 hover:-translate-y-1 hover:border-indigo-600 md:col-span-2">
               <div className="p-3 bg-gray-50 dark:bg-surface-dark rounded-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
                 <MousePointerClick className="w-8 h-8" />
               </div>
@@ -75,7 +75,7 @@ export default function Home() {
               <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                 Un guide pas à pas pour transformer votre idée en réalité.
               </p>
-              <div className="mt-6 flex items-center text-sm font-medium text-gray-900 dark:text-white opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
+              <div className="mt-6 flex items-center text-sm font-medium text-gray-900 dark:text-white opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
                 C'est parti <ArrowRight className="ml-1 w-4 h-4" />
               </div>
             </Link>
@@ -95,9 +95,14 @@ export default function Home() {
             <MousePointerClick className="w-3 h-3" />
             <span>Toucher l'écran pour commencer</span>
           </div>
+<<<<<<< HEAD
           <Link href="/admin" className="flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors p-1 group">
             <span className="opacity-0 group-hover:opacity-100 transition-opacity">Administration</span>
             <span className="text-lg leading-none">π</span>
+=======
+          <Link href="/admin" className="opacity-30 hover:opacity-70 transition-opacity p-2" title="Admin">
+            <Settings className="w-4 h-4" />
+>>>>>>> 91470b8 (Update: 2026-02-10 12:10)
           </Link>
         </div>
       </footer>

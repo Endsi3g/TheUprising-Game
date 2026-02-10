@@ -1,61 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { transcribe, transcribeDualLang } from '@/lib/vosk-service';
-import {
-    processLanguageGuess,
-    detectLanguageFromText,
-    createDetectionState,
-    type LanguageDetectionState,
-    type LangGuess,
-} from '@/lib/language-detector';
-import type { Language } from '@/types/database';
+import OpenAI from 'openai';
+import { writeFile, unlink } from 'fs/promises';
+import { createReadStream } from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+import os from 'os';
 
-// ─── In-Memory Session Language State ─────────────────────────────────────────
-// In production, move this to Redis or Supabase for persistence across restarts.
-
-const sessionLangStates = new Map<string, LanguageDetectionState>();
-
-function getOrCreateState(sessionId: string, lang: Language): LanguageDetectionState {
-    if (!sessionLangStates.has(sessionId)) {
-        sessionLangStates.set(sessionId, createDetectionState(lang));
-    }
-    return sessionLangStates.get(sessionId)!;
-}
-
-// ─── POST /api/voice/transcribe ───────────────────────────────────────────────
-
-/**
- * Receives audio from the kiosk browser, transcribes it with Vosk,
- * runs language detection, and returns the transcript + language info.
- *
- * Accepts multipart/form-data:
- *   - audio: WAV/WebM audio blob (PCM 16kHz 16-bit mono)
- *   - sessionId: UUID of the current session
- *   - currentLang: current session language ('fr' | 'en')
- *   - dualLang: optional, set to 'true' to run both FR+EN models for auto-detection
- */
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
     try {
-        const formData = await request.formData();
+        const formData = await req.formData();
+        const file = formData.get('file') as Blob | null;
 
-        const audioFile = formData.get('audio');
-        const sessionId = formData.get('sessionId') as string | null;
-        const currentLang = (formData.get('currentLang') as Language) || 'fr';
-        const dualLang = formData.get('dualLang') === 'true';
-
-        if (!audioFile || !(audioFile instanceof Blob)) {
-            return NextResponse.json(
-                { error: 'Missing or invalid audio file. Send as multipart/form-data with field name "audio".' },
-                { status: 400 }
-            );
+        if (!file) {
+            return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
         }
 
-        if (!sessionId) {
-            return NextResponse.json(
-                { error: 'Missing sessionId field.' },
-                { status: 400 }
-            );
+        const apiKey = process.env.OPENAI_API_KEY;
+        if (!apiKey) {
+            return NextResponse.json({ error: 'Missing OpenAI API Key' }, { status: 500 });
         }
 
+<<<<<<< HEAD
         // Validate file size before memory intensive operations (max 25MB)
         if (audioFile.size > 25 * 1024 * 1024) {
             return NextResponse.json(
@@ -67,14 +32,16 @@ export async function POST(request: NextRequest) {
         // Convert Blob → Buffer
         const arrayBuffer = await audioFile.arrayBuffer();
         const audioBuffer = Buffer.from(arrayBuffer);
+=======
+        // Save blob to temp file (OpenAI SDK expects a file object or path in Node)
+        // Note: fs access is generally server-side only. Next.js App Router runs in Node env.
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const tempFilePath = path.join(os.tmpdir(), `${uuidv4()}.webm`);
+>>>>>>> 91470b8 (Update: 2026-02-10 12:10)
 
-        if (audioBuffer.length === 0) {
-            return NextResponse.json(
-                { error: 'Audio file is empty.' },
-                { status: 400 }
-            );
-        }
+        await writeFile(tempFilePath, buffer);
 
+<<<<<<< HEAD
         let transcript: string;
         let confidence: number;
         let langGuess: Language;
@@ -121,12 +88,24 @@ export async function POST(request: NextRequest) {
             newSessionLang: langResult.newSessionLang,
             switchMessage: langResult.switchMessage,
             error,
+=======
+        const openai = new OpenAI({ apiKey });
+
+        // Call Whisper API
+        const transcription = await openai.audio.transcriptions.create({
+            file: createReadStream(tempFilePath),
+            model: 'whisper-1',
+            language: 'fr', // Force French for optimization
+>>>>>>> 91470b8 (Update: 2026-02-10 12:10)
         });
-    } catch (err) {
-        console.error('[Voice/Transcribe] Error:', err);
-        return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
-        );
+
+        // Cleanup temp file
+        await unlink(tempFilePath);
+
+        return NextResponse.json({ text: transcription.text });
+
+    } catch (error: any) {
+        console.error('Transcription error:', error);
+        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
     }
 }

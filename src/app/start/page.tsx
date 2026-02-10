@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Rocket, CheckCircle, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Rocket, ArrowRight, Lightbulb, FileText, Zap } from 'lucide-react';
 
 export default function StartBusinessPage() {
     return (
@@ -11,7 +11,7 @@ export default function StartBusinessPage() {
             <header className="w-full px-12 py-8 flex justify-between items-center z-10">
                 <Link href="/" className="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
                     <ArrowLeft className="w-5 h-5" />
-                    <span className="text-sm font-medium tracking-wide">RETOUR À L'ACCUEIL</span>
+                    <span className="text-sm font-medium tracking-wide">RETOUR À L&apos;ACCUEIL</span>
                 </Link>
             </header>
 
@@ -28,25 +28,29 @@ export default function StartBusinessPage() {
                             Commencez votre aventure.
                         </h1>
                         <p className="text-xl text-gray-500 dark:text-gray-400 font-light max-w-2xl mx-auto leading-relaxed">
-                            Nous allons vous guider étape par étape pour transformer votre idée en une entreprise florissante avec l'aide de l'IA.
+                            Nous allons vous guider étape par étape pour transformer votre idée en une entreprise florissante avec l&apos;aide de l&apos;IA.
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mt-12">
                         {[
-                            { title: 'Validation', desc: 'Analysez la viabilité de votre idée de marché.' },
-                            { title: 'Business Plan', desc: 'Générez un plan complet et structuré.' },
-                            { title: 'Lancement', desc: 'Obtenez votre checklist de démarrage personnalisée.' }
+                            { title: 'Validation', desc: 'Analysez la viabilité de votre idée de marché.', icon: Lightbulb },
+                            { title: 'Business Plan', desc: 'Générez un plan complet et structuré.', icon: FileText },
+                            { title: 'Lancement', desc: 'Obtenez votre checklist de démarrage personnalisée.', icon: Zap }
                         ].map((item, i) => (
                             <div key={i} className="p-8 bg-white dark:bg-background-dark border border-border-light dark:border-border-dark rounded-2xl shadow-sm hover:shadow-md transition-all">
-                                <CheckCircle className="w-8 h-8 text-green-500 mb-4" />
+                                <item.icon className="w-8 h-8 text-green-500 mb-4" />
                                 <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
                                 <p className="text-gray-500 dark:text-gray-400">{item.desc}</p>
                             </div>
                         ))}
                     </div>
 
+<<<<<<< HEAD
                     <Link href="/audit" className="group relative inline-flex items-center justify-center px-12 py-6 text-xl font-medium text-white transition-all duration-200 bg-black dark:bg-white dark:text-black rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 hover:shadow-2xl hover:-translate-y-1 mt-12">
+=======
+                    <Link href="/audit?mode=startup" className="group relative inline-flex items-center justify-center px-12 py-6 text-xl font-medium text-white transition-all duration-200 bg-green-600 hover:bg-green-700 rounded-2xl hover:shadow-2xl hover:-translate-y-1 mt-12" type="button">
+>>>>>>> 91470b8 (Update: 2026-02-10 12:10)
                         <span>Lancer le guide interactif</span>
                         <ArrowRight className="ml-3 w-6 h-6 transition-transform group-hover:translate-x-1" />
                     </Link>

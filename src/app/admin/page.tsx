@@ -34,7 +34,7 @@ export default function AdminOverviewPage() {
     // Auth Guard
     useEffect(() => {
         if (!authLoading && !user) {
-            router.push('/admin/login'); // Or just /login if admin specific login doesn't exist
+            router.push('/login');
         }
     }, [user, authLoading, router]);
 
