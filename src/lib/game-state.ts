@@ -35,8 +35,9 @@ export type GameAction =
     | { type: 'ADD_ASSISTANT_MESSAGE'; content: string }
     | { type: 'START_REPORT_GENERATION' }
     | { type: 'SET_REPORT'; report: ReportJson }
-    | { type: 'SET_ERROR'; error: string }
+    | { type: 'SET_ERROR'; error: string | null }
     | { type: 'SET_LOADING'; loading: boolean }
+    | { type: 'SET_SESSION_ID'; sessionId: string }
     | { type: 'RESET' };
 
 // ─── Initial State ────────────────────────────────────────────────────────────
@@ -127,6 +128,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
         case 'SET_LOADING':
             return { ...state, isLoading: action.loading };
+
+        case 'SET_SESSION_ID':
+            return { ...state, sessionId: action.sessionId };
 
         case 'RESET':
             return { ...initialGameState };

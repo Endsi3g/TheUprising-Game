@@ -22,7 +22,7 @@ function CategoryButton({ icon: Icon, label, onSelect }: { icon: LucideIcon, lab
 export default function AuditPage() {
     const [step, setStep] = useState(1);
     const [companyName, setCompanyName] = useState('');
-    const [, setCategory] = useState('');
+    const [category, setCategory] = useState('');
 
     const handleNext = () => {
         if (companyName.trim()) {
@@ -41,23 +41,6 @@ export default function AuditPage() {
         setStep(3);
     };
 
-<<<<<<< HEAD
-    const CategoryButton = ({ icon: Icon, label }: { icon: any, label: string }) => (
-        <button
-            onClick={() => handleCategorySelect(label)}
-            className="flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-surface-dark border-2 border-transparent hover:border-black dark:hover:border-white rounded-xl transition-all duration-200 group gap-4"
-        >
-            <div className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                <Icon className="w-6 h-6 text-gray-900 dark:text-white" />
-            </div>
-            <span className="font-semibold text-gray-900 dark:text-white">{label}</span>
-        </button>
-    );
-
-    const progress = (step === 1) ? 20 : (step === 2) ? 60 : 100;
-
-=======
->>>>>>> 91470b8 (Update: 2026-02-10 12:10)
     return (
         <div className="min-h-screen bg-background text-foreground font-sans selection:bg-black selection:text-white dark:bg-background-dark dark:text-gray-100">
             {/* Header */}
@@ -110,13 +93,8 @@ export default function AuditPage() {
                                             value={companyName}
                                             onChange={(e) => setCompanyName(e.target.value)}
                                             onKeyDown={handleKeyDown}
-<<<<<<< HEAD
-                                            placeholder="Votre entreprise..."
-                                            className="w-full bg-transparent border-0 border-b-2 border-gray-200 dark:border-gray-800 py-4 text-4xl md:text-5xl font-bold text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-700 focus:ring-0 focus:border-black dark:focus:border-white transition-colors px-0"
-=======
                                             placeholder="Ex: Uprising Studio"
                                             className="w-full bg-transparent border-0 border-b-2 border-gray-200 py-4 text-4xl md:text-5xl font-bold text-gray-900 placeholder-gray-300 focus:ring-0 focus:border-black transition-colors px-0"
->>>>>>> 91470b8 (Update: 2026-02-10 12:10)
                                         />
                                     </div>
 
@@ -130,11 +108,7 @@ export default function AuditPage() {
                                             disabled={!companyName.trim()}
                                             className="group relative inline-flex items-center justify-center px-10 py-5 text-lg font-medium text-white transition-all duration-200 bg-black dark:bg-white dark:text-black rounded-xl hover:bg-gray-800 dark:hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-<<<<<<< HEAD
-                                            <span>Suivant</span>
-=======
                                             <span>Commencer l&apos;audit</span>
->>>>>>> 91470b8 (Update: 2026-02-10 12:10)
                                             <ArrowRight className="ml-3 w-5 h-5 transition-transform group-hover:translate-x-1" />
                                         </button>
                                     </div>
@@ -157,15 +131,9 @@ export default function AuditPage() {
                     <div className="w-full h-full flex flex-col items-center justify-center p-8 bg-white dark:bg-background-dark">
                         <div className="w-full flex flex-col items-center space-y-10 z-10 max-w-7xl mx-auto">
                             <div className="flex items-end justify-center gap-6 mb-4">
-<<<<<<< HEAD
-                                <div className="pb-4 text-center">
-                                    <span className="inline-block px-3 py-1 bg-gray-100 dark:bg-surface-dark rounded-full text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">Audit IA</span>
-                                    <h2 className="text-5xl font-bold text-gray-900 dark:text-white leading-none">Activité</h2>
-=======
                                 <div className="pb-4">
                                     <span className="inline-block px-3 py-1 bg-gray-100 rounded-full text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Audit IA</span>
                                     <h2 className="text-5xl font-bold text-gray-900 leading-none">Étape 2</h2>
->>>>>>> 91470b8 (Update: 2026-02-10 12:10)
                                 </div>
                             </div>
 
@@ -175,46 +143,22 @@ export default function AuditPage() {
                                 </h1>
                             </div>
 
-<<<<<<< HEAD
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 w-full mt-8 max-w-4xl">
-                                <CategoryButton icon={Utensils} label="Restauration" />
-                                <CategoryButton icon={Building2} label="Immobilier" />
-                                <CategoryButton icon={Stethoscope} label="Santé" />
-                                <CategoryButton icon={LayoutDashboard} label="Autre" />
-=======
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 w-full mt-8">
                                 <CategoryButton icon={Utensils} label="Restauration" onSelect={handleCategorySelect} />
                                 <CategoryButton icon={Building2} label="Immobilier" onSelect={handleCategorySelect} />
                                 <CategoryButton icon={Stethoscope} label="Santé" onSelect={handleCategorySelect} />
                                 <CategoryButton icon={LayoutDashboard} label="Autre" onSelect={handleCategorySelect} />
->>>>>>> 91470b8 (Update: 2026-02-10 12:10)
                             </div>
                         </div>
 
                         <footer className="w-full px-8 py-8 flex flex-col items-center z-10 mt-auto">
                             <div className="w-full max-w-2xl flex flex-col gap-3">
-<<<<<<< HEAD
-                                <div className="flex justify-between items-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                                    <span>Étape {step} sur 3</span>
-                                    <span>{progress}%</span>
-                                </div>
-                                <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
-                                    <div
-                                        className="bg-black dark:bg-white h-full rounded-full transition-all duration-700 ease-out"
-                                        style={{ width: `${progress}%` }}
-                                        role="progressbar"
-                                        aria-valuenow={progress}
-                                        aria-valuemin={0}
-                                        aria-valuemax={100}
-                                    ></div>
-=======
                                 <div className="flex justify-between items-center text-sm font-medium text-gray-500">
                                     <span>Étape 2 sur 3</span>
                                     <span>50%</span>
                                 </div>
                                 <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                                     <div className="bg-black h-full rounded-full transition-all duration-500 ease-out w-1/2"></div>
->>>>>>> 91470b8 (Update: 2026-02-10 12:10)
                                 </div>
                             </div>
                         </footer>
@@ -222,8 +166,8 @@ export default function AuditPage() {
                 ) : (
                     <div className="w-full h-full flex flex-col bg-white dark:bg-background-dark">
                         <div className="flex-1 overflow-auto">
-                            <Ai04 onSubmit={(data) => {
-                                console.log("Final Audit Submission:", { companyName, category, ...data });
+                            <Ai04 onSubmit={(prompt) => {
+                                console.log("Final Audit Submission:", { companyName, category, prompt });
                                 // Logic to save result or transition to results screen
                             }} />
                         </div>

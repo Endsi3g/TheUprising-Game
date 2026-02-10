@@ -3,8 +3,14 @@ import { createServiceClient } from '@/lib/supabase';
 import { StartSessionSchema } from '@/lib/validators';
 import { getNicheQuestions } from '@/data/templates/niches';
 import { v4 as uuidv4 } from 'uuid';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!checkRateLimit(ip, 'session-start', { limit: 10, windowMs: 60 * 1000 })) {
+        return rateLimitResponse();
+    }
+
     try {
         const body = await request.json();
         const parsed = StartSessionSchema.safeParse(body);

@@ -17,10 +17,37 @@ export interface CrawlResult {
  * Returns a structured crawl result with a text summary suitable for LLM context.
  */
 export async function crawlUrl(url: string): Promise<CrawlResult> {
+    // SSRF Protection & Validation
+    let parsedUrl: URL;
+    try {
+        parsedUrl = new URL(url);
+    } catch {
+        throw new Error('Invalid URL format');
+    }
+
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+        throw new Error('Only HTTP/HTTPS protocols are allowed');
+    }
+
+    const hostname = parsedUrl.hostname.toLowerCase();
+
+    // Block private IP ranges and localhost
+    const isPrivateIp =
+        hostname === 'localhost' ||
+        hostname.startsWith('127.') ||
+        hostname.startsWith('10.') ||
+        hostname.startsWith('192.168.') ||
+        /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname) ||
+        hostname === '::1';
+
+    if (isPrivateIp) {
+        throw new Error('Access to private network resources is forbidden');
+    }
+
     // Fetch HTML with timeout and realistic user agent
     const { data: html } = await axios.get(url, {
-        timeout: 15000,
-        maxRedirects: 5,
+        timeout: 10000, // Reduced from 15s for stricter control
+        maxRedirects: 3, // Reduced from 5
         headers: {
             'User-Agent':
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -29,6 +56,7 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
             'Accept-Language': 'fr-CA,fr;q=0.9,en-US;q=0.8,en;q=0.7',
         },
         responseType: 'text',
+        // Prevent axios from following redirects to unsafe protocols if possible (axios follows HTTP redirects by default)
     });
 
     const $ = cheerio.load(html);
@@ -42,7 +70,7 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
 
     // --- Extract headings (h1–h3) ---
     const headings: { level: string; text: string }[] = [];
-    $('h1, h2, h3').each((_, el) => {
+    $('h1, h2, h3').each((_: number, el: any) => {
         const text = $(el).text().trim();
         if (text) {
             headings.push({ level: el.tagName.toLowerCase(), text });
@@ -51,7 +79,7 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
 
     // --- Extract first meaningful paragraphs ---
     const paragraphs: string[] = [];
-    $('p').each((_, el) => {
+    $('p').each((_: number, el: any) => {
         const text = $(el).text().trim();
         if (text.length > 30 && paragraphs.length < 10) {
             paragraphs.push(text);
@@ -60,7 +88,7 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
 
     // --- Extract links with text ---
     const links: { text: string; href: string }[] = [];
-    $('a').each((_, el) => {
+    $('a').each((_: number, el: any) => {
         const text = $(el).text().trim();
         const href = $(el).attr('href') || '';
         if (text && text.length > 2 && href && links.length < 20) {
@@ -71,7 +99,7 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
     // --- Extract CTAs (buttons, .cta, data-cta, [type=submit]) ---
     const ctas: string[] = [];
     $('button, .cta, [data-cta], input[type="submit"], a.btn, a.button').each(
-        (_, el) => {
+        (_: number, el: any) => {
             const text =
                 $(el).text().trim() || $(el).attr('value')?.trim() || '';
             if (text && text.length > 1 && ctas.length < 10) {
@@ -82,7 +110,7 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
 
     // --- Extract images with alt text ---
     const images: { alt: string; src: string }[] = [];
-    $('img').each((_, el) => {
+    $('img').each((_: number, el: any) => {
         const alt = $(el).attr('alt')?.trim() || '';
         const src = $(el).attr('src') || '';
         if (src && images.length < 15) {

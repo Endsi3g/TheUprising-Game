@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: salon-ai-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      # Connect to Ollama service
+      - DEFAULT_LLM_PROVIDER=ollama
+      - OLLAMA_BASE_URL=http://ollama:11434
+      # Pass through other env vars if needed, or use env_file
+    env_file:
+      - .env
+    depends_on:
+      - ollama
+    networks:
+      - app-network
+
+  ollama:
+    container_name: salon-ai-ollama
+    image: ollama/ollama:latest
+    restart: always
+    ports:
+      - "11434:11434" # Expose for local debugging/pulling models
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - app-network
+    # GPU Support (uncomment if you have NVIDIA GPU and nvidia-container-toolkit installed)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  ollama_data:
+
+
+networks:
+  app-network:
+    driver: bridge

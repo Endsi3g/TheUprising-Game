@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateTenantReport } from '@/lib/b2b-report';
+import { requireAdmin } from '@/lib/auth-guard';
 
 import { createServiceClient } from '@/lib/supabase';
 
@@ -17,24 +18,8 @@ export async function GET(request: NextRequest) {
         }
 
         // Auth Check
-        const supabase = createServiceClient();
-        const authHeader = request.headers.get('Authorization');
-        const tokenMatch = authHeader?.match(/^Bearer\s+(.+)$/i);
-        if (!tokenMatch) {
-            return NextResponse.json({ error: 'Missing or malformed Authorization header' }, { status: 401 });
-        }
-        const token = tokenMatch[1];
-        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // Admin role check
-        const isAdmin = user.app_metadata?.role === 'admin' || user.user_metadata?.role === 'admin';
-        if (!isAdmin) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
+        const { error: authError } = await requireAdmin(request);
+        if (authError) return authError;
 
         const report = await generateTenantReport(tenantId, periodDays);
 

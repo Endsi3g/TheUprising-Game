@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, User, Share2, MessageSquare, Heart, Bookmark, ChevronRight } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Calendar, User, Share2, MessageSquare, Heart, Bookmark, ChevronRight } from 'lucide-react';
 
 export default function BlogPostPage() {
     const params = useParams();
@@ -53,8 +53,12 @@ export default function BlogPostPage() {
                         Blog
                     </Link>
                     <div className="flex items-center gap-4">
-                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"><Share2 className="w-4 h-4" /></button>
-                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"><Bookmark className="w-4 h-4" /></button>
+                        <button className="p-2 hover:bg-white rounded-full transition-colors" key="share" aria-label="Share">
+                            <Share2 className="w-5 h-5" />
+                        </button>
+                        <button className="p-2 hover:bg-white rounded-full transition-colors" key="bookmark" aria-label="Bookmark">
+                            <Bookmark className="w-5 h-5" />
+                        </button>
                     </div>
                 </div>
             </header>

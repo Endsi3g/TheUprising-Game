@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { requireAdmin } from '@/lib/auth-guard';
 
 export async function GET(request: NextRequest) {
     try {
@@ -13,29 +14,11 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const supabase = createPublicClient();
-
         // Auth Check
-        const authHeader = request.headers.get('Authorization');
-        const tokenMatch = authHeader?.match(/^Bearer\s+(.+)$/i);
-        if (!tokenMatch) {
-            return NextResponse.json({ error: 'Missing or malformed Authorization header' }, { status: 401 });
-        }
-        const token = tokenMatch[1];
-        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        const { error: authError } = await requireAdmin(request);
+        if (authError) return authError;
 
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // Admin check (consistent with login page)
-        const adminEmails = ['quebecsaas@gmail.com', 'theuprisingstudio@gmail.com'];
-        const isAdminByEmail = user.email ? adminEmails.includes(user.email.toLowerCase()) : false;
-        const isAdminByRole = user.app_metadata?.role === 'admin' || user.user_metadata?.role === 'admin';
-
-        if (!isAdminByEmail && !isAdminByRole) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
+        const supabase = createServiceClient();
 
         // Total sessions
         const { count: sessionsCount, error: dbError } = await supabase

@@ -15,8 +15,10 @@ interface LLMResponse {
     provider: 'openai' | 'gemini' | 'ollama' | 'grok' | 'perplexity';
 }
 
+import { browse } from '@/lib/tools/browser';
+
 /**
- * Call OpenAI API.
+ * Call OpenAI API with Tool/Function Calling support.
  */
 async function callOpenAI(
     systemPrompt: string,
@@ -26,24 +28,89 @@ async function callOpenAI(
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error('Missing OPENAI_API_KEY');
 
-    const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true }); // Allow browser for demo/client-side if needed, though strictly server-side is better. 
-    // Note: Usually LLM calls are server-side. If this runs on client, we need dangerouslyAllowBrowser: true.
-    // However, looking at use-game.tsx, it calls /api/chat. So this is likely server-side.
-
+    const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
     const model = process.env.OPENAI_MODEL || 'gpt-4o';
 
-    const messages = [
+    const cleanHistory = history.map(m => ({ role: m.role, content: m.content }));
+
+    // Normalize messages for OpenAI
+    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
         { role: 'system', content: systemPrompt },
-        ...history.map(m => ({ role: m.role, content: m.content })),
+        ...cleanHistory.map(m => ({
+            role: m.role as 'user' | 'assistant' | 'system',
+            content: m.content || ''
+        })),
         { role: 'user', content: userMessage }
-    ] as OpenAI.Chat.ChatCompletionMessageParam[];
+    ];
 
-    const completion = await openai.chat.completions.create({
-        messages,
-        model,
-    });
+    const tools: OpenAI.Chat.ChatCompletionTool[] = [
+        {
+            type: 'function',
+            function: {
+                name: 'browse_web',
+                description: 'Visit a webpage and return its text content. Use this to get real-time information from the internet.',
+                parameters: {
+                    type: 'object',
+                    properties: {
+                        url: { type: 'string', description: 'The valid URL to visit.' },
+                    },
+                    required: ['url'],
+                },
+            },
+        },
+    ];
 
-    return completion.choices[0]?.message?.content || '';
+    let iterations = 0;
+    const MAX_ITERATIONS = 5;
+
+    while (iterations < MAX_ITERATIONS) {
+        const completion = await openai.chat.completions.create({
+            messages,
+            model,
+            tools,
+            tool_choice: 'auto',
+        });
+
+        const choice = completion.choices[0];
+        const message = choice.message;
+
+        // If no tool calls, return the text response
+        if (!message.tool_calls || message.tool_calls.length === 0) {
+            return message.content || '';
+        }
+
+        // If tool calls exist, process them
+        messages.push(message); // Add assistant's tool call message to history
+
+        for (const toolCall of message.tool_calls) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const tool = toolCall as any;
+            if (tool.function.name === 'browse_web') {
+                try {
+                    console.log('[LLM] Executing tool:', tool.function.name, tool.function.arguments);
+                    const args = JSON.parse(tool.function.arguments);
+                    const result = await browse(args.url);
+
+                    messages.push({
+                        role: 'tool',
+                        tool_call_id: tool.id,
+                        content: result,
+                    });
+                } catch (err: any) {
+                    console.error('[LLM] Tool execution failed:', err);
+                    messages.push({
+                        role: 'tool',
+                        tool_call_id: tool.id,
+                        content: `Error: ${err.message}`,
+                    });
+                }
+            }
+        }
+
+        iterations++;
+    }
+
+    return "Limit reached (too many tool calls).";
 }
 
 /**

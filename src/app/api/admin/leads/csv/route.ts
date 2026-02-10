@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { requireAdmin } from '@/lib/auth-guard';
 
 export async function GET(request: NextRequest) {
     try {
+        // 1. Secure the route
+        const { error: authError } = await requireAdmin(request);
+        if (authError) return authError;
+
         const { searchParams } = new URL(request.url);
         const tenantId = searchParams.get('tenantId');
 

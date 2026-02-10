@@ -91,9 +91,12 @@ export function CompanyInfoForm({ mode, showSiteUrl, onSubmit }: { mode?: string
 
                 {showSiteUrl && (
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">
-                            URL du site (optionnel)
-                        </label>
+                        <div className="flex justify-between items-center ml-1">
+                            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                URL du site
+                            </label>
+                            <span className="text-[10px] text-gray-400 font-medium bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-full border border-gray-100 dark:border-gray-700 uppercase tracking-wider">Optionnel</span>
+                        </div>
                         <input
                             type="url"
                             value={url}
@@ -104,14 +107,21 @@ export function CompanyInfoForm({ mode, showSiteUrl, onSubmit }: { mode?: string
                     </div>
                 )}
 
-                <button
-                    onClick={handleSubmit}
-                    disabled={!name.trim()}
-                    className="w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-xl font-bold text-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
-                >
-                    Continuer
-                    <ArrowRight className="w-5 h-5" />
-                </button>
+                <div className="pt-2">
+                    <button
+                        onClick={handleSubmit}
+                        disabled={!name.trim()}
+                        className="w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-xl font-bold text-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+                    >
+                        Continuer
+                        <ArrowRight className="w-5 h-5" />
+                    </button>
+                    {!name.trim() && (
+                        <p className="text-center text-xs text-orange-500 mt-3 font-medium animate-pulse">
+                            Veuillez renseigner le nom de votre projet pour continuer.
+                        </p>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -226,8 +236,11 @@ export function ConversationPanel() {
                     <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-500">
                         <div className="max-w-[85%] bg-white/50 dark:bg-surface-dark/50 p-5 rounded-2xl rounded-tl-sm backdrop-blur-sm border border-gray-100 dark:border-gray-700 shadow-sm">
                             <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-lg">
-                                Bonjour{state.companyName ? ` ${state.companyName}` : ''} ! 👋 Je suis votre assistant IA.
-                                Commençons notre échange. Que souhaitez-vous me dire ?
+                                {state.mode === 'startup' ? (
+                                    <>Bonjour{state.companyName ? ` ${state.companyName}` : ''} ! 🚀 Je suis votre co-fondateur IA. Pour bien démarrer, <strong>décrivez-moi le concept de votre projet et votre public cible.</strong></>
+                                ) : (
+                                    <>Bonjour{state.companyName ? ` ${state.companyName}` : ''} ! 👋 Je suis votre auditeur IA. Pour commencer l&apos;analyse, <strong>décrivez-moi brièvement votre activité, votre cible et vos objectifs actuels.</strong></>
+                                )}
                             </p>
                         </div>
                     </div>
@@ -245,10 +258,27 @@ export function ConversationPanel() {
                 ))}
 
                 {state.isLoading && (
-                    <div className="flex justify-start animate-pulse">
-                        <div className="bg-gray-50 dark:bg-surface-dark/50 p-4 rounded-2xl rounded-bl-sm flex items-center gap-2">
-                            <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                            <span className="text-gray-400 text-sm">L&apos;IA réfléchit...</span>
+                    <div className="flex justify-start animate-in fade-in duration-300">
+                        <div className="bg-gray-50 dark:bg-surface-dark/50 p-4 rounded-2xl rounded-bl-sm flex items-center gap-3 border border-dashed border-gray-200 dark:border-gray-800">
+                            <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
+                            <span className="text-gray-500 dark:text-gray-400 text-sm font-medium tracking-wide">
+                                L&apos;IA analyse les données...
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {state.error && (
+                    <div className="flex justify-center my-4 animate-in zoom-in-95 duration-300">
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 p-4 rounded-xl max-w-md w-full text-center space-y-2">
+                            <p className="text-red-600 dark:text-red-400 text-sm font-semibold">Une erreur est survenue</p>
+                            <p className="text-red-500 dark:text-red-500 text-xs">{state.error}</p>
+                            <button
+                                onClick={() => state.conversation.length > 0 && sendMessage(state.conversation[state.conversation.length - 1].content)}
+                                className="text-[10px] underline text-red-400 hover:text-red-600 font-medium uppercase tracking-tighter"
+                            >
+                                Réessayer l&apos;envoi
+                            </button>
                         </div>
                     </div>
                 )}
@@ -313,16 +343,31 @@ export function GameProgressBar() {
     const progress = getPhaseProgress(state.phase, state.conversation?.length || 0);
     const label = getPhaseLabel(state.phase, state.language);
 
+    const stepInfo = {
+        'mode_select': { step: 1, total: 5 },
+        'company_info': { step: 2, total: 5 },
+        'niche_select': { step: 3, total: 5 },
+        'conversation': { step: 4, total: 5 },
+        'generating_report': { step: 5, total: 5 },
+        'report_ready': { step: 5, total: 5 },
+        'idle': { step: 0, total: 5 }
+    };
+
+    const currentStep = stepInfo[state.phase] || { step: 0, total: 5 };
+
     return (
-        <div className="w-full px-6 py-3 border-b border-gray-100 dark:border-gray-800">
+        <div className="w-full px-6 py-3 border-b border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-background-dark/50 backdrop-blur-sm sticky top-0 z-30">
             <div className="max-w-4xl mx-auto">
-                <div className="flex justify-between items-center text-xs font-medium text-gray-500 mb-1.5">
-                    <span>{label}</span>
-                    <span>{progress}%</span>
+                <div className="flex justify-between items-end text-xs font-bold text-gray-500 mb-2">
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-[10px] text-orange-500 uppercase tracking-[0.2em] font-black">Étape {currentStep.step} sur {currentStep.total}</span>
+                        <span className="text-sm dark:text-gray-300">{label}</span>
+                    </div>
+                    <span className="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-[10px] text-gray-600 dark:text-gray-400">{progress}%</span>
                 </div>
-                <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden ring-1 ring-gray-100 dark:ring-gray-800">
                     <div
-                        className="bg-black dark:bg-white h-full rounded-full transition-all duration-700 ease-out"
+                        className="bg-gradient-to-r from-orange-400 to-orange-600 h-full rounded-full transition-all duration-1000 ease-in-out shadow-[0_0_10px_rgba(249,115,22,0.3)]"
                         style={{ width: `${progress}%` }}
                     ></div>
                 </div>

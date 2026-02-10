@@ -65,6 +65,15 @@ export const AdminOverviewSchema = z.object({
     tenantId: z.string().uuid(),
 });
 
+export const ChatRequestSchema = z.object({
+    message: z.string().min(1).max(20000),
+    history: z.array(z.any()).optional().default([]),
+    mode: SessionModeSchema.optional().default('audit'),
+    niche: z.string().optional().default('General'),
+    language: LanguageSchema.optional().default('fr'),
+    sessionId: z.string().uuid().optional(),
+});
+
 // ─── Voice API Schemas ─────────────────────────────────────────────────────
 
 export const TranscribeAudioSchema = z.object({

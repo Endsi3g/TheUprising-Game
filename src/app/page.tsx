@@ -28,7 +28,7 @@ export default function Home() {
           <div className="text-center space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
               Bonjour ! <br />
-              Prêt à commencer ?
+              Choisissez votre parcours
             </h1>
             <p className="text-lg text-gray-500 dark:text-gray-400 font-light max-w-lg mx-auto">
               Sélectionnez une option ci-dessous pour commencer votre expérience interactive.
@@ -95,14 +95,9 @@ export default function Home() {
             <MousePointerClick className="w-3 h-3" />
             <span>Toucher l'écran pour commencer</span>
           </div>
-<<<<<<< HEAD
           <Link href="/admin" className="flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors p-1 group">
             <span className="opacity-0 group-hover:opacity-100 transition-opacity">Administration</span>
             <span className="text-lg leading-none">π</span>
-=======
-          <Link href="/admin" className="opacity-30 hover:opacity-70 transition-opacity p-2" title="Admin">
-            <Settings className="w-4 h-4" />
->>>>>>> 91470b8 (Update: 2026-02-10 12:10)
           </Link>
         </div>
       </footer>

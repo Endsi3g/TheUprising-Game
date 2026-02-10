@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useReducer, useCallback, useEffect, type ReactNode } from 'react';
+import { toast } from 'sonner';
 import { gameReducer, initialGameState, type GameState, type GameAction } from '@/lib/game-state';
 import type { SessionMode, Niche, Language, ReportJson } from '@/types/database';
 
@@ -65,8 +66,11 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
     }, []);
 
     const sendMessage = useCallback(async (content: string) => {
+        if (!content.trim()) return;
+
         dispatch({ type: 'ADD_USER_MESSAGE', content });
         dispatch({ type: 'SET_LOADING', loading: true });
+        dispatch({ type: 'SET_ERROR', error: null });
 
         try {
             const res = await fetch('/api/chat', {
@@ -74,28 +78,69 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: content,
-                    mode: state.mode,
-                    niche: state.niche,
+                    mode: state.mode ?? undefined,
+                    niche: state.niche ?? undefined,
                     language: state.language,
                     companyName: state.companyName,
                     siteUrl: state.siteUrl,
                     history: state.conversation,
+                    sessionId: state.sessionId ?? undefined,
                 }),
             });
 
-            if (!res.ok) throw new Error('Failed to get AI response');
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Failed to get AI response');
+            }
 
             const data = await res.json();
-            dispatch({ type: 'ADD_ASSISTANT_MESSAGE', content: data.message ?? data.response ?? '' });
+            const assistantMsg = data.message ?? data.response ?? '';
+
+            dispatch({ type: 'ADD_ASSISTANT_MESSAGE', content: assistantMsg });
 
             // Check if AI signals report readiness
-            if (data.message?.includes('[READY_FOR_REPORT]') || data.response?.includes('[READY_FOR_REPORT]')) {
+            if (assistantMsg.includes('[READY_FOR_REPORT]')) {
                 dispatch({ type: 'START_REPORT_GENERATION' });
             }
         } catch (err) {
-            dispatch({ type: 'SET_ERROR', error: err instanceof Error ? err.message : 'Unknown error' });
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            dispatch({ type: 'SET_ERROR', error: msg });
+            toast.error(`Erreur: ${msg}`);
+        } finally {
+            dispatch({ type: 'SET_LOADING', loading: false });
         }
-    }, [state.mode, state.niche, state.language, state.companyName, state.siteUrl, state.conversation]);
+    }, [state.mode, state.niche, state.language, state.companyName, state.siteUrl, state.conversation, state.sessionId, dispatch]);
+
+    // DB Persistence: Auto-initialize session when company info and niche are ready
+    useEffect(() => {
+        if (state.phase === 'conversation' && !state.sessionId && state.companyName && state.mode) {
+            const startSession = async () => {
+                try {
+                    const res = await fetch('/api/game/session/start', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            mode: state.mode,
+                            niche: state.niche,
+                            language: state.language,
+                            companyName: state.companyName,
+                            siteUrl: state.siteUrl,
+                        }),
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.sessionId) {
+                            dispatch({ type: 'SET_SESSION_ID', sessionId: data.sessionId });
+                        }
+                    }
+                } catch (err) {
+                    console.error('[Session] Failed to auto-start session:', err);
+                }
+            };
+            startSession();
+        }
+    }, [state.phase, state.sessionId, state.companyName, state.mode, state.niche, state.language, state.siteUrl, dispatch]);
 
     // Auto-trigger report generation
     useEffect(() => {
@@ -114,6 +159,7 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
                             history: state.conversation,
                             companyName: state.companyName,
                             siteUrl: state.siteUrl,
+                            sessionId: state.sessionId,
                         }),
                     });
 
@@ -127,6 +173,7 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
                     console.error(err);
                     if (mounted) {
                         dispatch({ type: 'SET_ERROR', error: 'Failed to generate report' });
+                        toast.error("Échec de la génération du rapport");
                     }
                 }
             };
@@ -135,7 +182,7 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
         }
 
         return () => { mounted = false; };
-    }, [state.phase, state.mode, state.niche, state.language, state.conversation, state.companyName, state.siteUrl]);
+    }, [state.phase, state.mode, state.niche, state.language, state.conversation, state.companyName, state.siteUrl, state.sessionId, dispatch]);
 
     return (
         <GameContext.Provider value={{
@@ -150,8 +197,7 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
             setReport,
             reset,
             sendMessage,
-        }
-        }>
+        }}>
             {children}
         </GameContext.Provider>
     );

@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useGame } from '@/hooks/use-game';
 import { CompanyInfoForm, NicheSelector, ConversationPanel, GameProgressBar } from '@/components/game/GameFlow';
-import { ReportDisplay } from '@/components/game/ReportDisplay';
 import { Rocket, Utensils, Building2, Stethoscope, LayoutDashboard, ShoppingBag, Palette, Wrench, Laptop, Heart, MapPin } from 'lucide-react';
 import type { Niche } from '@/types/database';
 
@@ -22,6 +22,7 @@ const startupNiches = [
 
 export default function StartupGamePage() {
     const { state, selectMode, setCompanyInfo, selectNiche } = useGame();
+    const router = useRouter();
 
     // Auto-select startup mode if not already set
     useEffect(() => {
@@ -29,6 +30,13 @@ export default function StartupGamePage() {
             selectMode('startup');
         }
     }, [state.mode, selectMode]);
+
+    // Handle redirection to results page
+    useEffect(() => {
+        if (state.phase === 'report_ready' && state.report) {
+            router.push('/game/startup/results');
+        }
+    }, [state.phase, state.report, router]);
 
     return (
         <div className="flex flex-col h-full flex-grow">
@@ -58,11 +66,10 @@ export default function StartupGamePage() {
                 )}
 
                 {state.phase === 'report_ready' && state.report && (
-                    <ReportDisplay
-                        report={state.report}
-                        title="Votre rapport de démarrage ! 🚀"
-                        iconColorClass="bg-green-500"
-                    />
+                    <div className="space-y-6 text-center">
+                        <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                        <p className="text-gray-500 animate-pulse">Redirection vers votre plan...</p>
+                    </div>
                 )}
             </div>
         </div>
