@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Portfolio Projects Gallery Screen</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#000000",
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#191919",
+                        "surface-light": "#F7F7F5",
+                        "surface-dark": "#2F2F2F",
+                        "border-light": "#E0E0E0",
+                        "border-dark": "#3F3F3F",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 8px rgba(0, 0, 0, 0.04)',
+                        'hover': '0 8px 24px rgba(0, 0, 0, 0.08)',
+                        'card': '0 1px 3px rgba(0,0,0,0.05)',
+                    }
+                },
+            },
+        };
+    </script>
+    <style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .card-enter {
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 font-body antialiased flex flex-col h-screen overflow-hidden selection:bg-gray-200 dark:selection:bg-gray-700">
+    <header class="w-full px-8 py-6 flex justify-between items-center z-10">
+        <div class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
+            role="button" tabindex="0" aria-label="Version Info">
+            <span class="material-symbols-outlined text-xl" aria-hidden="true">grid_view</span>
+            <span class="text-sm font-medium tracking-wide">KIOSK v2.0</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-right hidden sm:block">
+                <p class="text-xs font-medium text-gray-500">Guide Interactif</p>
+                <p class="text-sm font-bold">Découvrez nos pépites</p>
+            </div>
+            <div
+                class="w-12 h-12 relative flex items-center justify-center bg-gray-50 dark:bg-surface-dark rounded-full border border-border-light dark:border-border-dark overflow-hidden">
+                <img alt="Minimalist mascot"
+                    class="w-8 h-8 object-contain mix-blend-multiply dark:invert dark:mix-blend-normal opacity-80"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOknTxlBT96YTEx-ZMxLVrSTwpMTkEvWXs238lC9C3GzW4Uyoyx34Iy0cJkoAYquvIAFQjaxQIn89w0GGE4R0Sek4-DFXqaO_EFYpj2ck_SEBftm5KQ9fv545iNwG0LH9GlFRFh7NNZrz1fTZKib0lINfqm9blvgnH_7EZkF64gEj5wWFhUr_Ovhho9lkq1439VUfhNITwH3974h_RyYSbjGoJp08EjovoDeEIxv5Qh_0_0Bvn4bAmi2sDwLkY6J7rh_q87MnfkD-o"
+                    style="filter: grayscale(100%) contrast(120%);" />
+            </div>
+        </div>
+    </header>
+    <main class="flex-grow flex flex-col relative w-full h-full">
+        <div
+            class="absolute top-1/4 left-10 w-96 h-96 bg-gray-50 dark:bg-gray-800 rounded-full mix-blend-multiply dark:mix-blend-overlay filter blur-3xl opacity-40">
+        </div>
+        <div
+            class="absolute bottom-10 right-10 w-80 h-80 bg-gray-50 dark:bg-gray-800 rounded-full mix-blend-multiply dark:mix-blend-overlay filter blur-3xl opacity-40">
+        </div>
+        <div class="z-10 w-full h-full flex flex-col max-w-[1920px] mx-auto px-8 md:px-16 lg:px-24 pt-4 pb-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
+                <div>
+                    <span
+                        class="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-2 block">Portfolio</span>
+                    <h1
+                        class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight">
+                        Nos Projets &amp; Réalisations
+                    </h1>
+                </div>
+                <div class="flex gap-4">
+                    <button
+                        class="w-12 h-12 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-black hover:text-white hover:border-black dark:hover:bg-white dark:hover:text-black transition-all duration-300"
+                        aria-label="Précédent">
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                    </button>
+                    <button
+                        class="w-12 h-12 rounded-full bg-black text-white dark:bg-white dark:text-black flex items-center justify-center hover:bg-gray-800 dark:hover:bg-gray-200 transition-all duration-300 shadow-lg"
+                        aria-label="Suivant">
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+            <div class="flex-grow relative overflow-hidden flex items-center">
+                <div
+                    class="flex gap-8 overflow-x-auto hide-scrollbar snap-x snap-mandatory px-2 pb-8 w-full h-full items-center">
+                    <div class="card-enter relative flex-shrink-0 w-[400px] md:w-[480px] lg:w-[600px] bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300 snap-center group cursor-pointer"
+                        style="animation-delay: 0.1s;">
+                        <div
+                            class="w-full aspect-video bg-gray-100 dark:bg-black/20 border-b border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
+                            <div
+                                class="absolute inset-0 flex items-center justify-center text-gray-300 dark:text-gray-600">
+                                <span class="material-symbols-outlined text-6xl opacity-20">smart_display</span>
+                            </div>
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                            </div>
+                        </div>
+                        <div class="p-8">
+                            <div class="flex justify-between items-start mb-3">
+                                <span
+                                    class="px-3 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full">Web
+                                    Design</span>
+                                <span
+                                    class="material-symbols-outlined text-gray-400 group-hover:text-black dark:group-hover:text-white transition-colors"
+                                    aria-hidden="true">arrow_outward</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Plateforme E-Learning</h3>
+                            <p class="text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
+                                Une interface éducative intuitive conçue pour maximiser l'engagement des étudiants avec
+                                des parcours personnalisés.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card-enter relative flex-shrink-0 w-[400px] md:w-[480px] lg:w-[600px] bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300 snap-center group cursor-pointer"
+                        style="animation-delay: 0.2s;">
+                        <div
+                            class="w-full aspect-video bg-gray-100 dark:bg-black/20 border-b border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
+                            <div
+                                class="absolute inset-0 flex items-center justify-center text-gray-300 dark:text-gray-600">
+                                <span class="material-symbols-outlined text-6xl opacity-20">devices</span>
+                            </div>
+                        </div>
+                        <div class="p-8">
+                            <div class="flex justify-between items-start mb-3">
+                                <span
+                                    class="px-3 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full">SaaS
+                                    B2B</span>
+                                <span
+                                    class="material-symbols-outlined text-gray-400 group-hover:text-black dark:group-hover:text-white transition-colors">arrow_outward</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Dashboard Analytics IA
+                            </h3>
+                            <p class="text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
+                                Tableau de bord complet permettant de visualiser des données complexes traitées par
+                                intelligence artificielle en temps réel.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card-enter relative flex-shrink-0 w-[400px] md:w-[480px] lg:w-[600px] bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300 snap-center group cursor-pointer"
+                        style="animation-delay: 0.3s;">
+                        <div
+                            class="w-full aspect-video bg-gray-100 dark:bg-black/20 border-b border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
+                            <div
+                                class="absolute inset-0 flex items-center justify-center text-gray-300 dark:text-gray-600">
+                                <span class="material-symbols-outlined text-6xl opacity-20">shopping_bag</span>
+                            </div>
+                        </div>
+                        <div class="p-8">
+                            <div class="flex justify-between items-start mb-3">
+                                <span
+                                    class="px-3 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full">E-Commerce</span>
+                                <span
+                                    class="material-symbols-outlined text-gray-400 group-hover:text-black dark:group-hover:text-white transition-colors">arrow_outward</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Marketplace Bio</h3>
+                            <p class="text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
+                                Refonte complète de l'expérience utilisateur pour une place de marché dédiée aux
+                                produits biologiques et locaux.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card-enter relative flex-shrink-0 w-[200px] md:w-[250px] bg-transparent border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col items-center justify-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer snap-center group"
+                        style="animation-delay: 0.4s;">
+                        <div
+                            class="w-16 h-16 rounded-full bg-gray-50 dark:bg-surface-dark flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-gray-400">add</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-500">Voir tout le catalogue</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-between items-center border-t border-gray-100 dark:border-gray-800 pt-6">
+                <button
+                    class="group flex items-center gap-3 px-6 py-3 rounded-full hover:bg-gray-100 dark:hover:bg-surface-dark transition-colors text-gray-900 dark:text-white"
+                    aria-label="Retour à l'accueil">
+                    <div
+                        class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center group-hover:border-black dark:group-hover:border-white transition-colors bg-white dark:bg-transparent">
+                        <span class="material-symbols-outlined text-sm" aria-hidden="true">arrow_back</span>
+                    </div>
+                    <span class="font-medium text-sm">Retour à l'accueil</span>
+                </button>
+                <div class="flex gap-2">
+                    <span class="w-2 h-2 rounded-full bg-black dark:bg-white"></span>
+                    <span class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-700"></span>
+                    <span class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-700"></span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+
+</html>

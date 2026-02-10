@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Audit Startup Screen</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#000000",
+                        "primary-glow": "#6366F1", 
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#191919",
+                        "surface-light": "#F7F7F5",
+                        "surface-dark": "#2F2F2F",
+                        "border-light": "#E0E0E0",
+                        "border-dark": "#3F3F3F",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 8px rgba(0, 0, 0, 0.04)',
+                        'hover': '0 4px 12px rgba(0, 0, 0, 0.08)',
+                        'indigo-glow': '0 4px 20px rgba(99, 102, 241, 0.25)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .speech-bubble {
+            position: relative;
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 24px;
+            width: 0;
+            height: 0;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            border-right: 12px solid #F3F4F6;}
+        .dark .speech-bubble::after {
+            border-right-color: #374151;}
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 font-body antialiased flex flex-col h-screen overflow-hidden selection:bg-indigo-100 dark:selection:bg-indigo-900">
+<header class="w-full px-12 py-8 flex justify-between items-center z-10 absolute top-0 left-0">
+<div class="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined text-xl">arrow_back</span>
+<span class="text-sm font-medium tracking-wide">RETOUR À L'ACCUEIL</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono text-gray-400">SESSION ID: #8291A</span>
+<button class="p-2 rounded-full hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined block dark:hidden text-gray-600">dark_mode</span>
+<span class="material-symbols-outlined hidden dark:block text-gray-300">light_mode</span>
+</button>
+</div>
+</header>
+<main class="flex-grow flex w-full h-full relative">
+<div class="absolute top-[-10%] right-[-5%] w-96 h-96 bg-indigo-50 dark:bg-indigo-900/20 rounded-full mix-blend-multiply dark:mix-blend-overlay filter blur-3xl opacity-40"></div>
+<div class="grid grid-cols-12 w-full h-full">
+<div class="col-span-5 flex items-center justify-center relative p-12 lg:p-16 border-r border-border-light dark:border-border-dark bg-surface-light/30 dark:bg-surface-dark/10">
+<div class="flex flex-col items-center">
+<div class="relative w-72 h-72 lg:w-96 lg:h-96">
+<img alt="Computer mascot sitting at desk with notebook" class="w-full h-full object-contain mix-blend-multiply dark:invert dark:mix-blend-normal opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOknTxlBT96YTEx-ZMxLVrSTwpMTkEvWXs238lC9C3GzW4Uyoyx34Iy0cJkoAYquvIAFQjaxQIn89w0GGE4R0Sek4-DFXqaO_EFYpj2ck_SEBftm5KQ9fv545iNwG0LH9GlFRFh7NNZrz1fTZKib0lINfqm9blvgnH_7EZkF64gEj5wWFhUr_Ovhho9lkq1439VUfhNITwH3974h_RyYSbjGoJp08EjovoDeEIxv5Qh_0_0Bvn4bAmi2sDwLkY6J7rh_q87MnfkD-o" style="filter: grayscale(100%) contrast(110%);"/>
+<div class="absolute bottom-4 left-0 -translate-x-4 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 transform rotate-[-6deg]">
+<span class="material-symbols-outlined text-indigo-500">edit_note</span>
+</div>
+</div>
+<div class="mt-8 text-center opacity-40">
+<p class="text-sm font-mono uppercase tracking-widest">Assistant Audit v1.4</p>
+</div>
+</div>
+</div>
+<div class="col-span-7 flex flex-col justify-center px-16 lg:px-24 xl:px-32 relative bg-white dark:bg-background-dark">
+<div class="max-w-2xl w-full mx-auto space-y-12">
+<div class="flex items-start gap-6 animate-fade-in-up">
+<div class="speech-bubble bg-gray-100 dark:bg-gray-700/50 p-8 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 dark:border-gray-600/50 max-w-xl">
+<h1 class="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white leading-snug">
+                                Bonjour ! Je suis votre assistant IA.<br/>
+<span class="text-gray-500 dark:text-gray-400">Quel est le nom de votre entreprise ?</span>
+</h1>
+</div>
+</div>
+<div class="space-y-8 mt-12">
+<div class="relative group">
+<label class="sr-only" for="company-name">Nom de l'entreprise</label>
+<input autofocus="" class="w-full bg-transparent border-0 border-b-2 border-gray-200 dark:border-gray-700 py-4 text-4xl md:text-5xl font-bold text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-600 focus:ring-0 focus:border-black dark:focus:border-white transition-colors px-0 typing-cursor" id="company-name" placeholder="Votre entreprise..." type="text"/>
+</div>
+<div class="flex items-center justify-between pt-4">
+<p class="text-sm text-gray-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-base">info</span>
+                                Appuyez sur Entrée pour valider
+                            </p>
+<button class="group relative inline-flex items-center justify-center px-10 py-5 text-lg font-medium text-white transition-all duration-200 bg-black dark:bg-white dark:text-black rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-indigo-glow hover:shadow-lg hover:-translate-y-1">
+<span>Commencer l'audit</span>
+<span class="material-symbols-outlined ml-3 transition-transform group-hover:translate-x-1">arrow_forward</span>
+<div class="absolute inset-0 rounded-xl ring-2 ring-white/20 dark:ring-black/10 group-hover:ring-white/40"></div>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="absolute bottom-0 right-0 w-[58.333%] px-16 py-8 flex justify-between items-center text-xs text-gray-400 dark:text-gray-500 pointer-events-none">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+<span>Moteur IA connecté</span>
+</div>
+<div class="font-mono">
+            KIOSK OS 2.0
+        </div>
+</footer>
+
+</body></html>

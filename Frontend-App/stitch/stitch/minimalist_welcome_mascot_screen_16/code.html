@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Audit Results Screen</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#000000",
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#191919",
+                        "surface-light": "#F7F7F5",
+                        "surface-dark": "#2F2F2F",
+                        "border-light": "#E0E0E0",
+                        "border-dark": "#3F3F3F",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                        '3xl': '2rem',
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 8px rgba(0, 0, 0, 0.04)',
+                        'hover': '0 4px 12px rgba(0, 0, 0, 0.08)',
+                        'card': '0 4px 20px rgba(0, 0, 0, 0.03)',
+                    }
+                },
+            },
+        };
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 font-body antialiased flex flex-col h-screen overflow-hidden selection:bg-gray-200 dark:selection:bg-gray-700">
+<header class="w-full px-8 py-6 flex justify-between items-center z-10 shrink-0">
+<div class="flex items-center gap-2">
+<span class="text-sm font-medium tracking-wide uppercase opacity-50">Audit IA</span>
+<span class="text-sm font-medium opacity-30">/</span>
+<span class="text-sm font-bold tracking-wide uppercase">Résultats</span>
+</div>
+<div class="flex items-center gap-2 opacity-50">
+<span class="material-symbols-outlined text-xl">analytics</span>
+</div>
+</header>
+<main class="flex-grow flex flex-col items-center relative px-8 w-full max-w-7xl mx-auto pt-2 pb-8 h-full">
+<div class="absolute top-10 right-10 w-96 h-96 bg-gray-100 dark:bg-gray-800 rounded-full mix-blend-multiply dark:mix-blend-overlay filter blur-3xl opacity-40 pointer-events-none"></div>
+<div class="absolute bottom-10 left-10 w-72 h-72 bg-green-50 dark:bg-green-900 rounded-full mix-blend-multiply dark:mix-blend-overlay filter blur-3xl opacity-30 pointer-events-none"></div>
+<div class="w-full flex items-center justify-center gap-12 mb-10 z-10 relative">
+<div class="relative group cursor-default">
+<div class="w-32 h-32 md:w-40 md:h-40 relative flex items-center justify-center">
+<img alt="Computer mascot jumping with joy holding a trophy" class="w-full h-full object-contain mix-blend-multiply dark:invert dark:mix-blend-normal opacity-90 scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUxSp1FKC-mQsUKaom-pA9AmkCutjEizt-rzgjPBTNl76gLAPjLsy_O4rA6riU1Ii8rZckxN-z2rrBNlbU6ICMi68Em5Oz0O4ZcGHyVYYLKPIOa41stG6IUAtW9cKcyhVRq7WDALLzKwPvlWXbwcKtDwrFsfBvPePYxanbR2B-lO3HTAH5rdGHoyWk6QK0O-A71g3cuisu4654qrfIwGkRYNVIwKJULsh-qwQrmYlpYBY-YpqbmfAlBkMDnnx5hz6canD0bejbA3gF" style="filter: grayscale(100%) contrast(120%); mix-blend-mode: multiply; opacity: 0;"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-9xl text-gray-800 dark:text-gray-200" style="font-variation-settings: 'FILL' 0, 'wght' 200;">trophy</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<div class="relative flex items-center justify-center w-40 h-40 border-8 border-black dark:border-white rounded-full bg-white dark:bg-surface-dark shadow-xl">
+<div class="flex flex-col items-center leading-none">
+<span class="text-5xl font-bold text-gray-900 dark:text-white">84</span>
+<span class="text-xl font-medium text-gray-500 dark:text-gray-400 mt-1">/ 100</span>
+</div>
+</div>
+<h1 class="text-2xl font-bold mt-4 text-center">Excellent travail !</h1>
+</div>
+</div>
+<div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow overflow-hidden mb-8 z-10">
+<div class="bg-surface-light dark:bg-surface-dark rounded-3xl p-6 shadow-card border border-gray-100 dark:border-border-dark flex flex-col h-full">
+<div class="flex items-center gap-3 mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
+<div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-symbols-outlined">thumb_up</span>
+</div>
+<h2 class="text-xl font-bold text-gray-900 dark:text-white">Points Forts</h2>
+</div>
+<div class="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-grow">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-green-600 dark:text-green-400 mt-0.5 font-bold">check_circle</span>
+<div>
+<p class="font-semibold text-gray-900 dark:text-white">Structure HTML sémantique</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Excellent usage des balises.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-green-600 dark:text-green-400 mt-0.5 font-bold">check_circle</span>
+<div>
+<p class="font-semibold text-gray-900 dark:text-white">Vitesse de chargement</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Temps de réponse serveur &lt; 200ms.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-green-600 dark:text-green-400 mt-0.5 font-bold">check_circle</span>
+<div>
+<p class="font-semibold text-gray-900 dark:text-white">Adaptabilité Mobile</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Design parfaitement responsive.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-green-600 dark:text-green-400 mt-0.5 font-bold">check_circle</span>
+<div>
+<p class="font-semibold text-gray-900 dark:text-white">Sécurité SSL</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Certificat valide et actif.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-3xl p-6 shadow-card border border-gray-100 dark:border-border-dark flex flex-col h-full">
+<div class="flex items-center gap-3 mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
+<div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined">build</span>
+</div>
+<h2 class="text-xl font-bold text-gray-900 dark:text-white">Axes d'amélioration</h2>
+</div>
+<div class="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-grow">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-orange-500 dark:text-orange-400 mt-0.5">warning</span>
+<div>
+<p class="font-semibold text-gray-900 dark:text-white">Optimisation des images</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Certaines images sont trop lourdes.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-orange-500 dark:text-orange-400 mt-0.5">warning</span>
+<div>
+<p class="font-semibold text-gray-900 dark:text-white">Méta-descriptions</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Absentes sur 3 pages clés.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-orange-500 dark:text-orange-400 mt-0.5">warning</span>
+<div>
+<p class="font-semibold text-gray-900 dark:text-white">Contraste couleurs</p>
+<p class="text-sm text-gray-500 dark:text-gray-400">Faible ratio sur les boutons secondaires.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-surface-dark rounded-3xl p-8 shadow-card border-2 border-gray-900 dark:border-gray-100 flex flex-col items-center justify-center text-center h-full relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 leading-snug">
+                    Obtenez votre rapport complet
+                </h3>
+<div class="bg-white p-4 rounded-xl border border-gray-200 shadow-inner mb-6">
+<img alt="QR Code for full report" class="w-48 h-48 mix-blend-multiply dark:mix-blend-normal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvoC6aAkZ_gnZQUGXF_TwZpJu_pTHxgb0PaDlbcqtUiaZvPoKATi_SO3XPfKMMgfWwC2IF5VT8oii51pR3TgHz6cvxJ_D6QNc03TbYuBboUpTsGrHevwxspkEkcvvAKuqOPc63vG67MY0oBrODNzdPYXfN1KQoLZJz_rkStj9U42FVcSpj96ByCKuIzPDxRd6oreFfvEh0_htq17ETmhd1T1nGHS5lnBYLB89jnqu3M9Ok-IsVlPIpcSu_Mk1dkqyEG2ugiIjQugAC"/>
+</div>
+<p class="text-sm text-gray-600 dark:text-gray-300 max-w-xs mx-auto leading-relaxed">
+                    Scannez pour obtenir votre rapport complet et vos conseils personnalisés sur mobile.
+                </p>
+</div>
+</div>
+<div class="w-full flex flex-col items-center justify-center gap-4 mt-auto mb-6 z-20">
+<button class="w-full max-w-md bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 text-lg font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">restart_alt</span>
+                Recommencer l'audit
+            </button>
+<button class="text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white font-medium text-base transition-colors py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                Prendre rendez-vous avec un expert
+            </button>
+</div>
+</main>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #e5e7eb;
+            border-radius: 20px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+        }
+    </style>
+
+</body></html>

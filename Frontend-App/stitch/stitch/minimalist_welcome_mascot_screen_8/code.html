@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Minimalist Booking Screen</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#000000",
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#191919",
+                        "surface-light": "#F7F7F5",
+                        "surface-dark": "#2F2F2F",
+                        "border-light": "#E0E0E0",
+                        "border-dark": "#3F3F3F",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0px", // Notion style is often square or slightly rounded, but borders are sharp
+                        'sm': '2px',
+                        'md': '4px',
+                        'lg': '6px',
+                    },
+                },
+            },
+        };
+    </script>
+<style>::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #E0E0E0;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #BDBDBD;
+        }
+        .notion-border {
+            border: 1px solid #E0E0E0;
+        }
+        .dark .notion-border {
+            border-color: #3F3F3F;
+        }
+        input:focus {
+            box-shadow: none !important;
+            border-color: #000 !important;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 font-body antialiased flex flex-col h-screen overflow-hidden selection:bg-gray-200 dark:selection:bg-gray-700">
+<header class="w-full px-8 py-4 flex justify-between items-center z-10 border-b border-border-light dark:border-border-dark bg-white dark:bg-background-dark">
+<div class="flex items-center gap-2 cursor-pointer">
+<span class="material-symbols-outlined text-xl">calendar_month</span>
+<span class="text-sm font-medium tracking-wide">KIOSK v2.0 / Réservation</span>
+</div>
+<div class="flex gap-4">
+<button class="px-3 py-1 text-xs border border-border-light dark:border-border-dark rounded hover:bg-surface-light dark:hover:bg-surface-dark transition-colors">Retour</button>
+<button class="p-1 rounded-full hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined block dark:hidden text-gray-600 text-lg">dark_mode</span>
+<span class="material-symbols-outlined hidden dark:block text-gray-300 text-lg">light_mode</span>
+</button>
+</div>
+</header>
+<main class="flex-grow flex w-full h-full relative">
+<div class="absolute top-10 left-10 w-96 h-96 bg-gray-50 dark:bg-gray-800 rounded-full mix-blend-multiply dark:mix-blend-overlay filter blur-3xl opacity-40 pointer-events-none"></div>
+<div class="flex w-full h-full max-w-7xl mx-auto p-6 gap-6">
+<div class="w-1/3 flex flex-col justify-center items-center relative space-y-8 p-8 border border-border-light dark:border-border-dark bg-white dark:bg-background-dark shadow-sm">
+<div class="absolute top-4 left-4">
+<span class="text-xs uppercase text-gray-400 tracking-wider">Étape 1 sur 2</span>
+</div>
+<div class="w-64 h-64 relative flex items-center justify-center">
+<img alt="Minimalist computer mascot pointing" class="w-full h-full object-contain mix-blend-multiply dark:invert dark:mix-blend-normal opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOknTxlBT96YTEx-ZMxLVrSTwpMTkEvWXs238lC9C3GzW4Uyoyx34Iy0cJkoAYquvIAFQjaxQIn89w0GGE4R0Sek4-DFXqaO_EFYpj2ck_SEBftm5KQ9fv545iNwG0LH9GlFRFh7NNZrz1fTZKib0lINfqm9blvgnH_7EZkF64gEj5wWFhUr_Ovhho9lkq1439VUfhNITwH3974h_RyYSbjGoJp08EjovoDeEIxv5Qh_0_0Bvn4bAmi2sDwLkY6J7rh_q87MnfkD-o" style="filter: grayscale(100%) contrast(120%);"/>
+<div class="absolute -bottom-4 -right-4 bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 p-4 shadow-lg w-32 rotate-6 z-[-1]">
+<div class="w-full h-2 bg-red-500 mb-2"></div>
+<div class="grid grid-cols-3 gap-1">
+<div class="h-1 bg-gray-200 w-full"></div><div class="h-1 bg-gray-200 w-full"></div><div class="h-1 bg-gray-200 w-full"></div>
+<div class="h-1 bg-gray-200 w-full"></div><div class="h-1 bg-gray-200 w-full"></div><div class="h-1 bg-gray-200 w-full"></div>
+</div>
+</div>
+</div>
+<div class="text-center space-y-4">
+<h2 class="text-2xl font-semibold text-gray-900 dark:text-white">Prendre rendez-vous</h2>
+<p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
+                        Rencontrez un expert pour discuter de votre projet digital ou d'audit IA. Durée estimée : 30 min.
+                    </p>
+</div>
+</div>
+<div class="w-2/3 flex flex-col bg-white dark:bg-background-dark border border-border-light dark:border-border-dark shadow-sm">
+<div class="p-8 border-b border-border-light dark:border-border-dark">
+<h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        Choisissez un créneau pour discuter de votre projet
+                    </h1>
+</div>
+<div class="flex flex-grow overflow-hidden">
+<div class="w-7/12 p-8 border-r border-border-light dark:border-border-dark flex flex-col overflow-y-auto">
+<h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4 uppercase tracking-wide">Date &amp; Heure</h3>
+<div class="mb-6">
+<div class="flex justify-between items-center mb-4">
+<span class="font-medium">Octobre 2023</span>
+<div class="flex gap-1">
+<button class="p-1 hover:bg-gray-100 rounded"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<button class="p-1 hover:bg-gray-100 rounded"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+<div class="grid grid-cols-7 text-center text-xs gap-y-2 mb-2 text-gray-400">
+<span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+</div>
+<div class="grid grid-cols-7 text-center text-sm gap-2">
+<span class="p-2 text-gray-300">25</span>
+<span class="p-2 text-gray-300">26</span>
+<span class="p-2 text-gray-300">27</span>
+<span class="p-2 text-gray-300">28</span>
+<span class="p-2 text-gray-300">29</span>
+<span class="p-2 text-gray-300">30</span>
+<span class="p-2 hover:bg-gray-100 cursor-pointer rounded">1</span>
+<span class="p-2 hover:bg-gray-100 cursor-pointer rounded">2</span>
+<span class="p-2 bg-black text-white dark:bg-white dark:text-black rounded cursor-pointer font-medium">3</span>
+<span class="p-2 hover:bg-gray-100 cursor-pointer rounded">4</span>
+<span class="p-2 hover:bg-gray-100 cursor-pointer rounded">5</span>
+<span class="p-2 text-gray-300">6</span>
+<span class="p-2 text-gray-300">7</span>
+</div>
+</div>
+<div class="space-y-2">
+<h4 class="text-xs text-gray-500 mb-2">Mardi 3 Octobre</h4>
+<div class="grid grid-cols-2 gap-3">
+<button class="py-2 px-4 border border-gray-200 dark:border-gray-700 text-sm hover:border-black dark:hover:border-white transition-colors text-center rounded-md">09:00</button>
+<button class="py-2 px-4 border border-gray-200 dark:border-gray-700 text-sm hover:border-black dark:hover:border-white transition-colors text-center rounded-md">09:30</button>
+<button class="py-2 px-4 bg-black text-white dark:bg-white dark:text-black border border-black text-sm text-center rounded-md shadow-sm">10:00</button>
+<button class="py-2 px-4 border border-gray-200 dark:border-gray-700 text-sm hover:border-black dark:hover:border-white transition-colors text-center rounded-md">10:30</button>
+<button class="py-2 px-4 border border-gray-200 dark:border-gray-700 text-sm hover:border-black dark:hover:border-white transition-colors text-center rounded-md">11:00</button>
+<button class="py-2 px-4 border border-gray-200 dark:border-gray-700 text-sm hover:border-black dark:hover:border-white transition-colors text-center rounded-md">11:30</button>
+</div>
+</div>
+</div>
+<div class="w-5/12 p-8 flex flex-col">
+<h3 class="text-sm font-medium text-gray-900 dark:text-white mb-6 uppercase tracking-wide">Vos informations</h3>
+<form class="space-y-6 flex-grow">
+<div class="space-y-1">
+<label class="block text-xs font-medium text-gray-700 dark:text-gray-300" for="firstname">Prénom</label>
+<input class="block w-full border-0 border-b border-gray-300 dark:border-gray-600 bg-transparent py-2 px-0 text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" id="firstname" name="firstname" placeholder="Jean" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="block text-xs font-medium text-gray-700 dark:text-gray-300" for="lastname">Nom</label>
+<input class="block w-full border-0 border-b border-gray-300 dark:border-gray-600 bg-transparent py-2 px-0 text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" id="lastname" name="lastname" placeholder="Dupont" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="block text-xs font-medium text-gray-700 dark:text-gray-300" for="email">Email professionnel</label>
+<input class="block w-full border-0 border-b border-gray-300 dark:border-gray-600 bg-transparent py-2 px-0 text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" id="email" name="email" placeholder="jean@entreprise.com" type="email"/>
+</div>
+<div class="space-y-1">
+<label class="block text-xs font-medium text-gray-700 dark:text-gray-300" for="notes">Sujet (Optionnel)</label>
+<textarea class="block w-full border border-gray-300 dark:border-gray-600 rounded-sm bg-transparent py-2 px-3 text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6" id="notes" name="notes" placeholder="Décrivez brièvement votre besoin..." rows="3"></textarea>
+</div>
+</form>
+<div class="mt-auto pt-6">
+<button class="w-full flex items-center justify-center gap-2 bg-black dark:bg-white text-white dark:text-black py-4 px-6 text-sm font-semibold uppercase tracking-wide hover:opacity-90 transition-opacity">
+                                Confirmer le rendez-vous
+                                <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="w-full px-8 py-4 flex justify-between items-center text-xs text-gray-400 dark:text-gray-500 bg-white dark:bg-background-dark border-t border-border-light dark:border-border-dark z-10">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+<span>Système opérationnel</span>
+</div>
+<div class="flex gap-4">
+<a class="hover:text-gray-900 dark:hover:text-gray-300 transition-colors" href="#">Confidentialité</a>
+<a class="hover:text-gray-900 dark:hover:text-gray-300 transition-colors" href="#">Conditions</a>
+</div>
+</footer>
+
+</body></html>

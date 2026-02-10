@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admin Detailed Stats Dashboard</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#000000",
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#191919",
+                        "surface-light": "#F7F7F5",
+                        "surface-dark": "#2F2F2F",
+                        "border-light": "#E0E0E0",
+                        "border-dark": "#3F3F3F",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        .chart-grid {
+            background-image: linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+                              linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .dark .chart-grid {
+            background-image: linear-gradient(to right, #374151 1px, transparent 1px),
+                              linear-gradient(to bottom, #374151 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 font-body antialiased flex h-screen overflow-hidden selection:bg-gray-200 dark:selection:bg-gray-700">
+<aside class="w-20 hidden md:flex flex-col items-center py-8 border-r border-border-light dark:border-border-dark bg-surface-light/30 dark:bg-surface-dark/30 backdrop-blur-sm z-20">
+<div class="mb-8">
+<span class="material-symbols-outlined text-3xl">dashboard</span>
+</div>
+<nav class="flex-1 flex flex-col gap-6 w-full px-2">
+<a class="p-3 rounded-xl bg-black text-white dark:bg-white dark:text-black shadow-soft flex justify-center group relative" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="absolute left-14 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">Stats</span>
+</a>
+<a class="p-3 rounded-xl hover:bg-surface-light dark:hover:bg-surface-dark text-gray-500 hover:text-black dark:hover:text-white transition-colors flex justify-center group relative" href="#">
+<span class="material-symbols-outlined">people</span>
+</a>
+<a class="p-3 rounded-xl hover:bg-surface-light dark:hover:bg-surface-dark text-gray-500 hover:text-black dark:hover:text-white transition-colors flex justify-center group relative" href="#">
+<span class="material-symbols-outlined">settings</span>
+</a>
+</nav>
+<button class="p-2 rounded-full hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined block dark:hidden text-gray-600">dark_mode</span>
+<span class="material-symbols-outlined hidden dark:block text-gray-300">light_mode</span>
+</button>
+</aside>
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-fixed relative">
+<div class="absolute inset-0 bg-white/95 dark:bg-background-dark/98 backdrop-blur-sm z-0"></div>
+<header class="relative z-10 px-8 py-8 border-b border-border-light dark:border-border-dark flex justify-between items-end">
+<div>
+<p class="text-sm font-mono text-gray-400 mb-1">TABLEAU DE BORD • V2.1</p>
+<h1 class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white">Bienvenue, Admin</h1>
+</div>
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Système en ligne</span>
+</div>
+</header>
+<div class="relative z-10 flex-1 p-8 overflow-y-auto">
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8 h-full max-w-7xl mx-auto">
+<div class="lg:col-span-3 space-y-8">
+<div class="bg-white dark:bg-zinc-900 border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-400">show_chart</span>
+                                Sessions par heure
+                            </h3>
+<select class="bg-surface-light dark:bg-surface-dark border-none text-xs rounded-lg py-1 px-3 focus:ring-1 focus:ring-black dark:focus:ring-white">
+<option>Aujourd'hui</option>
+<option>7 derniers jours</option>
+</select>
+</div>
+<div class="relative h-64 w-full chart-grid border border-dashed border-gray-200 dark:border-gray-800 rounded-lg p-4 flex items-end justify-between gap-2">
+<svg class="absolute inset-0 w-full h-full p-4 pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 50">
+<polyline class="text-black dark:text-white" fill="none" points="0,45 10,35 20,40 30,25 40,30 50,15 60,20 70,10 80,15 90,5 100,20" stroke="currentColor" stroke-width="0.5"></polyline>
+<circle class="text-black dark:text-white fill-current" cx="90" cy="5" r="1"></circle>
+</svg>
+<div class="absolute bottom-1 left-4 text-[10px] text-gray-400">08:00</div>
+<div class="absolute bottom-1 left-1/4 text-[10px] text-gray-400">10:00</div>
+<div class="absolute bottom-1 left-1/2 text-[10px] text-gray-400">12:00</div>
+<div class="absolute bottom-1 left-3/4 text-[10px] text-gray-400">14:00</div>
+<div class="absolute bottom-1 right-4 text-[10px] text-gray-400">16:00</div>
+</div>
+<div class="flex gap-8 mt-4">
+<div>
+<p class="text-xs text-gray-500 uppercase">Total Sessions</p>
+<p class="text-2xl font-bold">1,284</p>
+</div>
+<div>
+<p class="text-xs text-gray-500 uppercase">Pic d'activité</p>
+<p class="text-2xl font-bold">14:30</p>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-zinc-900 border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-400">bar_chart</span>
+                                Secteurs d'activité les plus audités
+                            </h3>
+</div>
+<div class="space-y-4">
+<div class="group">
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium">Technologie &amp; SaaS</span>
+<span class="text-gray-500">42%</span>
+</div>
+<div class="w-full bg-surface-light dark:bg-surface-dark rounded-full h-3 overflow-hidden">
+<div class="bg-black dark:bg-white h-3 rounded-full w-[42%] group-hover:opacity-80 transition-opacity"></div>
+</div>
+</div>
+<div class="group">
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium">Industrie &amp; Manufacturing</span>
+<span class="text-gray-500">28%</span>
+</div>
+<div class="w-full bg-surface-light dark:bg-surface-dark rounded-full h-3 overflow-hidden">
+<div class="bg-gray-600 dark:bg-gray-400 h-3 rounded-full w-[28%] group-hover:opacity-80 transition-opacity"></div>
+</div>
+</div>
+<div class="group">
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium">Services Financiers</span>
+<span class="text-gray-500">18%</span>
+</div>
+<div class="w-full bg-surface-light dark:bg-surface-dark rounded-full h-3 overflow-hidden">
+<div class="bg-gray-400 dark:bg-gray-600 h-3 rounded-full w-[18%] group-hover:opacity-80 transition-opacity"></div>
+</div>
+</div>
+<div class="group">
+<div class="flex justify-between text-sm mb-1">
+<span class="font-medium">Santé &amp; Bien-être</span>
+<span class="text-gray-500">12%</span>
+</div>
+<div class="w-full bg-surface-light dark:bg-surface-dark rounded-full h-3 overflow-hidden">
+<div class="bg-gray-300 dark:bg-gray-700 h-3 rounded-full w-[12%] group-hover:opacity-80 transition-opacity"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 flex flex-col h-full">
+<div class="bg-white dark:bg-zinc-900 border border-border-light dark:border-border-dark rounded-xl p-6 shadow-sm h-full flex flex-col">
+<h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-6">Quick Actions</h3>
+<div class="space-y-3 flex-1">
+<button class="w-full text-left p-3 rounded-lg hover:bg-surface-light dark:hover:bg-surface-dark border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-gray-500 group-hover:text-black dark:group-hover:text-white">download</span>
+<span class="font-medium text-sm">Exporter en CSV</span>
+</div>
+</button>
+<button class="w-full text-left p-3 rounded-lg hover:bg-surface-light dark:hover:bg-surface-dark border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-gray-500 group-hover:text-black dark:group-hover:text-white">palette</span>
+<span class="font-medium text-sm">Changer le Branding</span>
+</div>
+</button>
+<button class="w-full text-left p-3 rounded-lg hover:bg-surface-light dark:hover:bg-surface-dark border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-gray-500 group-hover:text-black dark:group-hover:text-white">visibility</span>
+<span class="font-medium text-sm">Voir le Rapport Global</span>
+</div>
+</button>
+</div>
+<div class="mt-auto pt-8 flex flex-col items-center">
+<div class="relative w-48 h-48">
+<img alt="Mascot with coffee" class="w-full h-full object-contain filter grayscale dark:invert opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOknTxlBT96YTEx-ZMxLVrSTwpMTkEvWXs238lC9C3GzW4Uyoyx34Iy0cJkoAYquvIAFQjaxQIn89w0GGE4R0Sek4-DFXqaO_EFYpj2ck_SEBftm5KQ9fv545iNwG0LH9GlFRFh7NNZrz1fTZKib0lINfqm9blvgnH_7EZkF64gEj5wWFhUr_Ovhho9lkq1439VUfhNITwH3974h_RyYSbjGoJp08EjovoDeEIxv5Qh_0_0Bvn4bAmi2sDwLkY6J7rh_q87MnfkD-o" style="transform: scaleX(-1);"/>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark px-4 py-2 rounded-lg mt-[-20px] relative z-10 border border-gray-100 dark:border-gray-800 shadow-sm">
+<p class="text-xs font-medium text-center">"Le café est prêt !"</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+</body></html>

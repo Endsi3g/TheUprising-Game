@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Analysis Code Animation</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#000000", 
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#191919",
+                        "surface-light": "#F7F7F5",
+                        "surface-dark": "#2F2F2F",
+                        "border-light": "#E0E0E0",
+                        "border-dark": "#3F3F3F",
+                        "terminal-green": "#22c55e",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        mono: ["monospace"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': '1rem',
+                    },
+                    animation: {
+                         'scroll-code': 'scrollCode 4s linear infinite',
+                         'typing': 'typing 1s steps(3) infinite alternate',
+                    },
+                    keyframes: {
+                        scrollCode: {
+                            '0%': { transform: 'translateY(0)' },
+                            '100%': { transform: 'translateY(-50%)' },
+                        },
+                        typing: {
+                            '0%': { transform: 'translateY(0)' },
+                            '100%': { transform: 'translateY(2px)' }
+                        }
+                    }
+                },
+            },
+        };
+    </script>
+<style>.terminal-text {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .sweat-drop {
+            animation: drop 1.5s infinite;
+        }
+        @keyframes drop {
+            0% { opacity: 0; transform: translateY(-5px); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(10px); }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 font-body antialiased flex flex-col h-screen overflow-hidden selection:bg-gray-200 dark:selection:bg-gray-700">
+<header class="w-full px-8 py-6 flex justify-between items-center z-10">
+<div class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined text-xl">grid_view</span>
+<span class="text-sm font-medium tracking-wide">KIOSK v2.0</span>
+</div>
+<button class="p-2 rounded-full hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined block dark:hidden text-gray-600">dark_mode</span>
+<span class="material-symbols-outlined hidden dark:block text-gray-300">light_mode</span>
+</button>
+</header>
+<main class="flex-grow flex flex-col items-center justify-center relative px-4 sm:px-8">
+<div class="absolute top-1/4 left-1/4 w-64 h-64 bg-gray-100 dark:bg-gray-800 rounded-full mix-blend-multiply dark:mix-blend-overlay filter blur-3xl opacity-30 animate-pulse"></div>
+<div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-50 dark:bg-blue-900 rounded-full mix-blend-multiply dark:mix-blend-overlay filter blur-3xl opacity-20 animate-pulse" style="animation-delay: 1s;"></div>
+<div class="max-w-xl w-full flex flex-col items-center space-y-8 z-10">
+<h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight text-center">
+            Analyse en cours...
+        </h1>
+<div class="relative group cursor-default mb-4">
+<div class="w-48 h-48 md:w-56 md:h-56 relative flex items-center justify-center animate-typing">
+<img alt="Blue retro computer mascot frantically typing with sweat drops" class="w-full h-full object-contain mix-blend-multiply dark:invert dark:mix-blend-normal opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOknTxlBT96YTEx-ZMxLVrSTwpMTkEvWXs238lC9C3GzW4Uyoyx34Iy0cJkoAYquvIAFQjaxQIn89w0GGE4R0Sek4-DFXqaO_EFYpj2ck_SEBftm5KQ9fv545iNwG0LH9GlFRFh7NNZrz1fTZKib0lINfqm9blvgnH_7EZkF64gEj5wWFhUr_Ovhho9lkq1439VUfhNITwH3974h_RyYSbjGoJp08EjovoDeEIxv5Qh_0_0Bvn4bAmi2sDwLkY6J7rh_q87MnfkD-o" style="filter: contrast(120%);"/>
+</div>
+<span class="material-symbols-outlined absolute top-4 -right-2 text-blue-400 sweat-drop text-xl" style="animation-delay: 0.2s;">water_drop</span>
+<span class="material-symbols-outlined absolute top-8 -left-2 text-blue-400 sweat-drop text-lg" style="animation-delay: 0.5s;">water_drop</span>
+</div>
+<div class="w-full border border-black dark:border-white bg-white dark:bg-background-dark p-4 rounded-sm shadow-sm overflow-hidden h-48 relative">
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white dark:to-background-dark z-10 pointer-events-none"></div>
+<div class="terminal-text text-sm md:text-base font-mono leading-relaxed opacity-80 animate-scroll-code">
+<div class="flex flex-col gap-1">
+<p class="text-green-600 dark:text-green-400">&gt; INITIALIZING KERNEL...</p>
+<p class="text-gray-400 dark:text-gray-500">Loading modules: [====================] 100%</p>
+<p class="text-green-600 dark:text-green-400">&gt; CRAWLING URL...</p>
+<p class="text-black dark:text-white">Found 42 internal links</p>
+<p class="text-green-600 dark:text-green-400">&gt; ANALYZING SEO...</p>
+<p class="text-gray-400 dark:text-gray-500">Checking meta tags... OK</p>
+<p class="text-black dark:text-white">Parsing structured data...</p>
+<p class="text-green-600 dark:text-green-400">&gt; GENERATING INSIGHTS...</p>
+<p class="text-black dark:text-white">Optimizing vectors...</p>
+<p class="text-green-600 dark:text-green-400">&gt; DETECTING PATTERNS...</p>
+<p class="text-gray-400 dark:text-gray-500">Correlation id: #88219-X</p>
+<p class="text-green-600 dark:text-green-400">&gt; RUNNING DIAGNOSTICS...</p>
+<p class="text-black dark:text-white">Memory usage: stable</p>
+<p class="text-green-600 dark:text-green-400">&gt; COMPILING REPORT...</p>
+</div>
+<div class="flex flex-col gap-1 mt-1">
+<p class="text-green-600 dark:text-green-400">&gt; INITIALIZING KERNEL...</p>
+<p class="text-gray-400 dark:text-gray-500">Loading modules: [====================] 100%</p>
+<p class="text-green-600 dark:text-green-400">&gt; CRAWLING URL...</p>
+<p class="text-black dark:text-white">Found 42 internal links</p>
+<p class="text-green-600 dark:text-green-400">&gt; ANALYZING SEO...</p>
+<p class="text-gray-400 dark:text-gray-500">Checking meta tags... OK</p>
+<p class="text-black dark:text-white">Parsing structured data...</p>
+<p class="text-green-600 dark:text-green-400">&gt; GENERATING INSIGHTS...</p>
+<p class="text-black dark:text-white">Optimizing vectors...</p>
+<p class="text-green-600 dark:text-green-400">&gt; DETECTING PATTERNS...</p>
+<p class="text-gray-400 dark:text-gray-500">Correlation id: #88219-X</p>
+<p class="text-green-600 dark:text-green-400">&gt; RUNNING DIAGNOSTICS...</p>
+<p class="text-black dark:text-white">Memory usage: stable</p>
+<p class="text-green-600 dark:text-green-400">&gt; COMPILING REPORT...</p>
+</div>
+</div>
+</div>
+<div class="w-full flex flex-col gap-2">
+<div class="h-2 w-full border border-black dark:border-white rounded-full p-[1px]">
+<div class="h-full bg-black dark:bg-white rounded-full" style="width: 60%;"></div>
+</div>
+<div class="flex justify-between text-xs font-mono uppercase tracking-wider text-gray-500 dark:text-gray-400">
+<span>Processing</span>
+<span>60%</span>
+</div>
+</div>
+</div>
+</main>
+<footer class="w-full px-8 py-6 flex justify-between items-center text-xs text-gray-400 dark:text-gray-500 z-10">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+<span>Traitement en cours</span>
+</div>
+<div>
+            Veuillez patienter
+        </div>
+</footer>
+</body></html>

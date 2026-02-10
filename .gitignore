@@ -1,0 +1,49 @@
+
+# Dependencies
+node_modules
+.pnpm-store
+
+# Python
+.venv/
+venv/
+__pycache__/
+
+# Next.js
+.next/
+out/
+
+# Models & Large assets
+models/
+*.wav
+*.mp3
+*.pcm
+Mascottes/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Brain / Agent
+.agent/
+.gemini/
+brain/
+test_output/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

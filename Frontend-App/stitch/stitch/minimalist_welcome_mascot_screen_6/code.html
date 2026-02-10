@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kiosk Result &amp; QR Screen</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:wght@700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#000000",
+                        "primary-glow": "#6366F1", 
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#191919",
+                        "surface-light": "#F7F7F5",
+                        "surface-dark": "#2F2F2F",
+                        "border-light": "#E0E0E0",
+                        "border-dark": "#3F3F3F",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        serif: ["Playfair Display", "serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                        '3xl': '2rem',
+                    },
+                    boxShadow: {
+                        'soft': '0 2px 8px rgba(0, 0, 0, 0.04)',
+                        'hover': '0 4px 12px rgba(0, 0, 0, 0.08)',
+                        'indigo-glow': '0 4px 20px rgba(99, 102, 241, 0.25)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+        .score-circle {
+            background: conic-gradient(#16a34a 0% 84%, #e5e7eb 84% 100%);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 font-body antialiased flex flex-col h-screen overflow-hidden selection:bg-indigo-100 dark:selection:bg-indigo-900">
+<header class="w-full px-12 py-8 flex justify-between items-center z-10 absolute top-0 left-0">
+<div class="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined text-xl">arrow_back</span>
+<span class="text-sm font-medium tracking-wide">NOUVEL AUDIT</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-xs font-mono text-gray-400">RAPPORT ID: #9921B</span>
+<button class="p-2 rounded-full hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined block dark:hidden text-gray-600">dark_mode</span>
+<span class="material-symbols-outlined hidden dark:block text-gray-300">light_mode</span>
+</button>
+</div>
+</header>
+<main class="flex-grow flex w-full h-full relative">
+<div class="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-green-50 dark:bg-green-900/20 rounded-full mix-blend-multiply dark:mix-blend-overlay filter blur-3xl opacity-40"></div>
+<div class="grid grid-cols-12 w-full h-full">
+<div class="col-span-5 flex flex-col items-center justify-center relative p-12 lg:p-16 border-r border-border-light dark:border-border-dark bg-surface-light/30 dark:bg-surface-dark/10">
+<div class="flex flex-col items-center gap-10">
+<div class="relative w-64 h-64 lg:w-80 lg:h-80 flex items-center justify-center">
+<div class="score-circle absolute inset-0 w-full h-full"></div>
+<div class="absolute inset-4 bg-white dark:bg-background-dark rounded-full flex flex-col items-center justify-center shadow-inner">
+<span class="text-7xl lg:text-8xl font-serif font-black text-gray-900 dark:text-white tracking-tighter">84</span>
+<span class="text-xl text-gray-400 font-medium mt-1">/ 100</span>
+</div>
+</div>
+<div class="relative w-64 h-64">
+<img alt="Computer mascot giving thumbs up" class="w-full h-full object-contain mix-blend-multiply dark:invert dark:mix-blend-normal opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOknTxlBT96YTEx-ZMxLVrSTwpMTkEvWXs238lC9C3GzW4Uyoyx34Iy0cJkoAYquvIAFQjaxQIn89w0GGE4R0Sek4-DFXqaO_EFYpj2ck_SEBftm5KQ9fv545iNwG0LH9GlFRFh7NNZrz1fTZKib0lINfqm9blvgnH_7EZkF64gEj5wWFhUr_Ovhho9lkq1439VUfhNITwH3974h_RyYSbjGoJp08EjovoDeEIxv5Qh_0_0Bvn4bAmi2sDwLkY6J7rh_q87MnfkD-o" style="filter: grayscale(100%) contrast(110%);"/>
+<div class="absolute top-0 right-10 translate-x-4 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 transform rotate-[12deg]">
+<span class="material-symbols-outlined text-green-500 text-3xl">thumb_up</span>
+</div>
+</div>
+<div class="text-center">
+<h2 class="text-2xl font-bold mb-2">Excellent travail !</h2>
+<p class="text-gray-500 dark:text-gray-400 max-w-xs mx-auto">Votre score est supérieur à 82% des entreprises de votre secteur.</p>
+</div>
+</div>
+</div>
+<div class="col-span-7 flex flex-col justify-center px-16 lg:px-24 xl:px-32 relative bg-white dark:bg-background-dark">
+<div class="max-w-2xl w-full mx-auto h-full flex flex-col justify-center py-12">
+<div class="flex-grow flex flex-col justify-center">
+<h3 class="text-xs font-mono uppercase tracking-widest text-gray-400 mb-8">Points Clés de l'Audit</h3>
+<div class="space-y-6">
+<div class="flex items-start gap-6 p-6 rounded-2xl bg-surface-light dark:bg-surface-dark border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-colors">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-symbols-outlined">check</span>
+</div>
+<div>
+<h4 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Performance SEO</h4>
+<p class="text-gray-500 dark:text-gray-400">Structure technique optimisée et balisage sémantique correct.</p>
+</div>
+<span class="ml-auto text-lg font-bold text-green-600 dark:text-green-400">A+</span>
+</div>
+<div class="flex items-start gap-6 p-6 rounded-2xl bg-surface-light dark:bg-surface-dark border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-colors">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-symbols-outlined">check</span>
+</div>
+<div>
+<h4 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Design &amp; UX</h4>
+<p class="text-gray-500 dark:text-gray-400">Cohérence visuelle forte et navigation intuitive détectée.</p>
+</div>
+<span class="ml-auto text-lg font-bold text-green-600 dark:text-green-400">A</span>
+</div>
+<div class="flex items-start gap-6 p-6 rounded-2xl bg-surface-light dark:bg-surface-dark border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-colors">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
+<span class="material-symbols-outlined">priority_high</span>
+</div>
+<div>
+<h4 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Optimisation Mobile</h4>
+<p class="text-gray-500 dark:text-gray-400">Quelques éléments cliquables sont trop proches.</p>
+</div>
+<span class="ml-auto text-lg font-bold text-yellow-600 dark:text-yellow-400">B-</span>
+</div>
+</div>
+</div>
+<div class="mt-12 pt-12 border-t border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-10">
+<div class="bg-white p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+<svg class="w-40 h-40 text-gray-900" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<rect height="35" rx="2" width="35" x="10" y="10"></rect>
+<rect height="35" rx="2" width="35" x="55" y="10"></rect>
+<rect height="35" rx="2" width="35" x="10" y="55"></rect>
+<rect height="10" width="10" x="55" y="55"></rect>
+<rect height="10" width="20" x="70" y="55"></rect>
+<rect height="20" width="10" x="55" y="70"></rect>
+<rect height="10" width="10" x="70" y="80"></rect>
+<rect height="10" width="10" x="80" y="70"></rect>
+<rect fill="white" height="9" width="9" x="23" y="23"></rect>
+<rect fill="white" height="9" width="9" x="68" y="23"></rect>
+<rect fill="white" height="9" width="9" x="23" y="68"></rect>
+</svg>
+</div>
+<div class="flex-1 space-y-3">
+<h3 class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+                                    Emportez votre rapport complet
+                                </h3>
+<p class="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
+                                    Scannez ce QR code pour télécharger l'analyse détaillée en PDF directement sur votre mobile.
+                                </p>
+<div class="flex items-center gap-2 text-sm text-indigo-600 dark:text-indigo-400 font-medium mt-2">
+<span class="material-symbols-outlined text-lg">bolt</span>
+<span>Disponible instantanément</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="absolute bottom-0 right-0 w-[58.333%] px-16 py-8 flex justify-between items-center text-xs text-gray-400 dark:text-gray-500 pointer-events-none">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+<span>Analyse terminée</span>
+</div>
+<div class="font-mono">
+            KIOSK OS 2.0
+        </div>
+</footer>
+
+</body></html>
