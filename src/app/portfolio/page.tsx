@@ -1,12 +1,13 @@
 'use client';
 
-import Image from 'next/image';
+
 import Link from 'next/link';
 import { LayoutGrid, ArrowLeft, ArrowRight, ArrowUpRight, Monitor, Smartphone, ShoppingBag } from 'lucide-react';
 
 const projects = [
     {
         id: 1,
+        slug: 'e-learning',
         title: "Plateforme E-Learning",
         description: "Une interface éducative intuitive conçue pour maximiser l'engagement des étudiants avec des parcours personnalisés.",
         category: "Web Design",
@@ -15,6 +16,7 @@ const projects = [
     },
     {
         id: 2,
+        slug: 'analytics-ia',
         title: "Dashboard Analytics IA",
         description: "Tableau de bord complet permettant de visualiser des données complexes traitées par intelligence artificielle en temps réel.",
         category: "SaaS B2B",
@@ -23,6 +25,7 @@ const projects = [
     },
     {
         id: 3,
+        slug: 'marketplace-bio',
         title: "Marketplace Bio",
         description: "Refonte complète de l'expérience utilisateur pour une place de marché dédiée aux produits biologiques et locaux.",
         category: "E-Commerce",
@@ -96,7 +99,7 @@ export default function PortfolioPage() {
                         <div ref={carouselRef} className="flex gap-8 overflow-x-auto hide-scrollbar snap-x snap-mandatory px-2 pb-8 w-full h-full items-center">
 
                             {projects.map((project) => (
-                                <div key={project.id} className="relative flex-shrink-0 w-[400px] md:w-[480px] lg:w-[600px] bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300 snap-center group cursor-pointer">
+                                <Link href={`/portfolio/${project.slug}`} key={project.id} className="relative flex-shrink-0 w-[400px] md:w-[480px] lg:w-[600px] bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300 snap-center group cursor-pointer">
                                     <div className="w-full aspect-video bg-gray-100 dark:bg-black/20 border-b border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
                                         <div className="absolute inset-0 flex items-center justify-center text-gray-300 dark:text-gray-600">
                                             <project.icon className="w-16 h-16 opacity-20" />
@@ -113,7 +116,7 @@ export default function PortfolioPage() {
                                             {project.description}
                                         </p>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
 
                             {/* View All Card */}
@@ -133,7 +136,7 @@ export default function PortfolioPage() {
                             <div className="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center group-hover:border-black dark:group-hover:border-white transition-colors bg-white dark:bg-transparent">
                                 <ArrowLeft className="text-sm w-4 h-4" />
                             </div>
-                            <span className="font-medium text-sm">Retour à l'accueil</span>
+                            <span className="font-medium text-sm">Retour à l&apos;accueil</span>
                         </Link>
                         <div className="flex gap-2">
                             <span className="w-2 h-2 rounded-full bg-black dark:bg-white"></span>

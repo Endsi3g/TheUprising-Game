@@ -46,7 +46,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        return NextResponse.json({ leadId: upserted.id, updated: true });
+        const isUpdated = upserted.updated_at !== upserted.created_at;
+        return NextResponse.json({ leadId: upserted.id, updated: isUpdated });
 
 
     } catch (err) {

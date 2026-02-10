@@ -34,13 +34,16 @@ export default function AdminOverviewPage() {
     // Auth Guard
     useEffect(() => {
         if (!authLoading && !user) {
-            router.push('/admin/login'); // Or just /login if admin specific login doesn't exist
+            router.push('/login');
         }
     }, [user, authLoading, router]);
 
     // Data Fetch
     useEffect(() => {
-        if (!user || !session) return; // Don't fetch if not logged in
+        if (!user || !session) {
+            if (!authLoading) setLoading(false);
+            return;
+        }
 
         fetch(`/api/admin/overview?tenantId=${TENANT_ID}`, {
             headers: {

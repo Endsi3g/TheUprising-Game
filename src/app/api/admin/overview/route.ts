@@ -13,19 +13,28 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const supabase = createServiceClient();
+        const supabase = createPublicClient();
 
         // Auth Check
         const authHeader = request.headers.get('Authorization');
-        if (!authHeader) {
-            return NextResponse.json({ error: 'Missing Authorization header' }, { status: 401 });
+        const tokenMatch = authHeader?.match(/^Bearer\s+(.+)$/i);
+        if (!tokenMatch) {
+            return NextResponse.json({ error: 'Missing or malformed Authorization header' }, { status: 401 });
         }
-
-        const token = authHeader.replace('Bearer ', '');
+        const token = tokenMatch[1];
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
         if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Admin check (consistent with login page)
+        const adminEmails = ['quebecsaas@gmail.com', 'theuprisingstudio@gmail.com'];
+        const isAdminByEmail = user.email ? adminEmails.includes(user.email.toLowerCase()) : false;
+        const isAdminByRole = user.app_metadata?.role === 'admin' || user.user_metadata?.role === 'admin';
+
+        if (!isAdminByEmail && !isAdminByRole) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
         // Total sessions
@@ -37,17 +46,21 @@ export async function GET(request: NextRequest) {
         if (dbError) throw dbError;
 
         // Completed sessions
-        const { count: completedCount } = await supabase
+        const { count: completedCount, error: compError } = await supabase
             .from('sessions')
             .select('*', { count: 'exact', head: true })
             .eq('tenant_id', tenantId)
             .not('completed_at', 'is', null);
 
+        if (compError) throw compError;
+
         // Sessions by mode
-        const { data: sessionsByMode } = await supabase
+        const { data: sessionsByMode, error: modeError } = await supabase
             .from('sessions')
             .select('mode')
             .eq('tenant_id', tenantId);
+
+        if (modeError) throw modeError;
 
         const modeBreakdown = (sessionsByMode || []).reduce(
             (acc, s) => {
@@ -58,10 +71,12 @@ export async function GET(request: NextRequest) {
         );
 
         // Total leads
-        const { count: leadsCount } = await supabase
+        const { count: leadsCount, error: leadsError } = await supabase
             .from('leads')
             .select('*', { count: 'exact', head: true })
             .eq('tenant_id', tenantId);
+
+        if (leadsError) throw leadsError;
 
         // Conversion rate
         const conversionRate =
@@ -70,12 +85,14 @@ export async function GET(request: NextRequest) {
                 : 0;
 
         // Recent sessions (last 10)
-        const { data: recentSessions } = await supabase
+        const { data: recentSessions, error: recentError } = await supabase
             .from('sessions')
             .select('id, mode, niche, language, created_at, completed_at')
             .eq('tenant_id', tenantId)
             .order('created_at', { ascending: false })
             .limit(10);
+
+        if (recentError) throw recentError;
 
         return NextResponse.json({
             sessionsCount: sessionsCount || 0,

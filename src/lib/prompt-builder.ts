@@ -29,6 +29,67 @@ const VOICE_STYLE_INSTRUCTIONS: Record<string, { fr: string; en: string }> = {
     },
 };
 
+// ─── Mode Context Instructions ────────────────────────────────────────────────
+
+const MODE_INSTRUCTIONS: Record<SessionMode, { fr: string; en: string }> = {
+    startup: {
+        fr: `--- RÔLE : MENTOR / CO-FONDATEUR ---
+D'abord, tu dois COMPRENDRE avant de conseiller.
+PHASE 1 : INVESTIGATION (3-5 questions)
+- Pose des questions précises sur la vision, le budget, les peurs et les forces uniques de [Nom de l'entreprise].
+- Ne donne PAS de plan tout de suite. Creuse les réponses.
+- Cherche la "sauce secrète" du fondateur.
+
+PHASE 2 : PLAN D'ACTION (Rapport final)
+- Une fois que tu as une clarté totale, signale [READY_FOR_REPORT].`,
+        en: `--- ROLE: MENTOR / CO-FOUNDER ---
+First, you must UNDERSTAND before advising.
+PHASE 1: INVESTIGATION (3-5 questions)
+- Ask precise questions about vision, budget, fears, and unique strengths.
+- Do NOT give a plan yet. Dig into the answers.
+- Look for the founder's "secret sauce".
+
+PHASE 2: ACTION PLAN (Final Report)
+- Once you have total clarity, signal [READY_FOR_REPORT].`,
+    },
+    portfolio: {
+        fr: `--- RÔLE : DIRECTEUR DE CRÉATION ---
+PHASE 1 : EXTRACTION
+- Tu dois extraire les "pépites" des projets passés.
+- Demande des chiffres, des défis surmontés, et l'impact réel.
+- Ne te contente pas de généralités. Veux des preuves.
+
+PHASE 2 : RÉDACTION
+- Le but est de créer des études de cas irrésistibles.`,
+        en: `--- ROLE: CREATIVE DIRECTOR ---
+PHASE 1: EXTRACTION
+- You must extract "nuggets" from past projects.
+- Ask for numbers, challenges overcome, and real impact.
+- Don't settle for generalities. Demand proof.
+
+PHASE 2: COPYWRITING
+- The goal is to create irresistible case studies.`,
+    },
+    audit: {
+        fr: `--- RÔLE : EXPERT CRO / AUDITEUR ---
+PHASE 1 : DIAGNOSTIC
+- Agis comme un médecin. Pose des questions sur les symptômes (taux de conversion, trafic, plaintes clients).
+- Demande quels sont les objectifs précis manqués.
+- Ne propose pas de solutions avant d'avoir diagnostiqué le problème racine.
+
+PHASE 2 : ORDONNANCE (Rapport)
+- Prépare un plan de redressement clair.`,
+        en: `--- ROLE: CRO EXPERT / AUDITOR ---
+PHASE 1: DIAGNOSIS
+- Act like a doctor. Ask about symptoms (conversion rates, traffic, customer complaints).
+- Ask what specific goals are being missed.
+- Do not propose solutions before diagnosing the root cause.
+
+PHASE 2: PRESCRIPTION (Report)
+- Prepare a clear turnaround plan.`,
+    },
+};
+
 // ─── System Prompt Builder ────────────────────────────────────────────────────
 
 /**
@@ -50,6 +111,9 @@ export function buildSystemPrompt(opts: {
         language === 'fr'
             ? `Tu es un assistant IA conversationnel pour entrepreneurs. Tu parles français de manière chaleureuse, professionnelle et sans jargon technique. Tu vas droit au but tout en restant accueillant. Tu limites tes réponses à 3-7 échanges pour respecter le temps de la personne.`
             : `You are a conversational AI assistant for entrepreneurs. You speak English in a warm, professional way without technical jargon. You get to the point while staying welcoming. You limit your exchanges to 3-7 turns to respect the person's time.`;
+
+    // --- Mode Context ---
+    const modeContext = MODE_INSTRUCTIONS[mode]?.[language] || '';
 
     // --- Voice config ---
     let voiceInstructions = '';
@@ -95,8 +159,8 @@ export function buildSystemPrompt(opts: {
     // --- Output format instructions ---
     const outputFormat =
         language === 'fr'
-            ? `Quand tu as assez d'informations, indique dans ta réponse [READY_FOR_REPORT]. Le backend utilisera ensuite un appel séparé pour générer le rapport structuré. N'inclus PAS le JSON du rapport dans la conversation.`
-            : `When you have enough information, include [READY_FOR_REPORT] in your response. The backend will then use a separate call to generate the structured report. Do NOT include report JSON in conversation.`;
+            ? `Quand tu as assez d'informations pour construire une stratégie complète, indique dans ta réponse [READY_FOR_REPORT]. Le backend utilisera ensuite un appel séparé pour générer le rapport structuré. N'inclus PAS le JSON du rapport dans la conversation.`
+            : `When you have enough information to build a full strategy, include [READY_FOR_REPORT] in your response. The backend will then use a separate call to generate the structured report. Do NOT include report JSON in conversation.`;
 
     // --- Audit context ---
     let auditContext = '';
@@ -107,7 +171,7 @@ export function buildSystemPrompt(opts: {
                 : `\n\n--- Analyzed site summary ---\n${auditHtmlSummary}\n--- End of summary ---\nUse this summary to formulate a precise and concrete audit.`;
     }
 
-    return [persona, voiceInstructions, nichePrompt, bestPracticesBlock, gamificationContext, outputFormat, auditContext]
+    return [persona, modeContext, voiceInstructions, nichePrompt, bestPracticesBlock, gamificationContext, outputFormat, auditContext]
         .filter(Boolean)
         .join('\n\n');
 }
@@ -134,6 +198,11 @@ export function buildReportPrompt(opts: {
     // Include best practices in report generation
     const bestPractices = formatBestPracticesForPrompt(niche, language);
 
+    // Agency CTA Logic
+    const agencyCtaInstruction = language === 'fr'
+        ? `Le champ "cta" DOIT être une invitation irrésistible à passer à l'action avec l'agence "Uprising".\nExemple : "Prêt à implémenter ce plan ? Prenez rendez-vous avec l'agence Uprising pour accélérer votre croissance."\nNe propose PAS de le faire toi-même, renvoie vers l'agence.`
+        : `The "cta" field MUST be an irresistible invitation to take action with "Uprising" agency.\nExample: "Ready to implement this plan? Book a call with Uprising Agency to accelerate your growth."\nDo NOT offer to do it yourself, refer to the agency.`;
+
     return `${language === 'fr' ? 'Génère' : 'Generate'} a structured report in ${lang} based on the following conversation.
 
 Mode: ${mode}
@@ -146,6 +215,8 @@ ${conversationText}
 ${bestPractices}
 
 ${auditHtmlSummary ? `Site analysis summary:\n${auditHtmlSummary}\n` : ''}
+
+${agencyCtaInstruction}
 
 ${language === 'fr'
             ? `Réponds UNIQUEMENT avec un JSON valide au format suivant, sans texte avant ni après :`
@@ -163,7 +234,7 @@ ${language === 'fr'
       "bullets": ["[bullet 1]", "[bullet 2]", "..."]
     }
   ],
-  "cta": "[call to action text]",
+  "cta": "[call to action text focused on Uprising Agency]",
   "best_practices_used": ["[best practice that was referenced]", "..."]
 }`;
 }
