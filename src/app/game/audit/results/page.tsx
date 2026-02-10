@@ -38,6 +38,12 @@ export default function AuditResultsPage() {
                         Nouvel audit
                     </Link>
                     <div className="flex gap-3">
+                        <Link
+                            href="/contact"
+                            className="flex items-center gap-2 px-4 py-2 bg-black dark:bg-white dark:text-black text-white rounded-lg text-sm font-bold hover:opacity-90 transition-all"
+                        >
+                            Obtenir un Devis
+                        </Link>
                         <button
                             title="Partager le lien"
                             onClick={() => {

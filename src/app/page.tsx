@@ -91,6 +91,7 @@ export default function Home() {
           <span>Système opérationnel</span>
         </div>
         <div className="flex items-center gap-6">
+          <Link href="/contact" className="hover:text-gray-900 dark:hover:text-white transition-colors">Contact</Link>
           <div className="flex items-center gap-2">
             <MousePointerClick className="w-3 h-3" />
             <span>Toucher l'écran pour commencer</span>

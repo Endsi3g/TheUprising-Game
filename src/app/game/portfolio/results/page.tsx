@@ -36,6 +36,12 @@ export default function PortfolioResultsPage() {
                         Nouvelle niche
                     </Link>
                     <div className="flex gap-3">
+                        <Link
+                            href="/contact"
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-all"
+                        >
+                            Engagez-nous
+                        </Link>
                         <button
                             title="Partager le lien"
                             onClick={() => {
