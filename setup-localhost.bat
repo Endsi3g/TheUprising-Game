@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 chcp 65001 >nul 2>&1
 title The Uprising Game — Local Setup
 echo.
@@ -7,63 +8,52 @@ echo ║       THE UPRISING GAME — LOCALHOST DEPLOYMENT       ║
 echo ╚══════════════════════════════════════════════════════╝
 echo.
 
+set "ERR_LOG=setup_error.log"
+if exist "%ERR_LOG%" del "%ERR_LOG%"
+
 REM ──────────────────────────────────────────────────────────
-REM  1. Vérifier que Node.js est installé
+REM  1. Vérifier Node.js
 REM ──────────────────────────────────────────────────────────
 echo [1/5] Vérification de Node.js...
 where node >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo ❌  Node.js n'est pas installé ou n'est pas dans le PATH.
-    echo     Télécharge-le ici : https://nodejs.org/
-    echo.
-    pause
-    exit /b 1
+if !ERRORLEVEL! NEQ 0 (
+    call :handle_error "Node.js n'est pas installé ou n'est pas dans le PATH. Téléchargez-le sur https://nodejs.org/"
 )
 for /f "tokens=*" %%v in ('node -v') do set NODE_VERSION=%%v
-echo     ✅  Node.js %NODE_VERSION% détecté.
+echo     ✅  Node.js !NODE_VERSION! détecté.
 
 REM ──────────────────────────────────────────────────────────
-REM  2. Vérifier que Docker est installé (Optionnel mais recommandé)
+REM  2. Vérifier Docker
 REM ──────────────────────────────────────────────────────────
-echo [2/5] Vérification de Docker (pour Ollama)...
+echo [2/5] Vérification de Docker...
 where docker >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo     ⚠️  Docker n'est pas détecté. L'IA locale (Ollama) ne pourra pas être lancée automatiquement.
-    echo        Si vous utilisez OpenAI, vous pouvez ignorer ce message.
+if !ERRORLEVEL! NEQ 0 (
+    echo     ⚠️  Docker absent. L'IA locale (Ollama) ne sera pas disponible.
 ) else (
-    echo     ✅  Docker détecté.
-    echo     🚀  Lancement de la stack Ollama (docker-compose up)...
+    echo     ✅  Docker détecté. Lancement de la stack IA...
     docker-compose up -d >nul 2>&1
-    if %ERRORLEVEL% NEQ 0 (
-        echo     ⚠️  Échec du lancement de Docker Compose. Assurez-vous que Docker Desktop est lancé.
+    if !ERRORLEVEL! NEQ 0 (
+        echo     ⚠️  Docker Compose a échoué. Vérifiez que Docker Desktop est lancé. >> "%ERR_LOG%"
+        echo     ⚠️  Docker Compose a échoué. Poursuite sans IA locale.
     ) else (
-        echo     ✅  Stack IA locale initialisée.
+        echo     ✅  Stack IA lancée.
     )
 )
 echo.
 
 REM ──────────────────────────────────────────────────────────
-REM  3. Fichier .env
+REM  3. Configuration .env
 REM ──────────────────────────────────────────────────────────
-echo [3/5] Vérification du fichier .env...
-if not exist "%~dp0.env" (
-    if exist "%~dp0.env.example" (
-        copy "%~dp0.env.example" "%~dp0.env" >nul
-        echo     ⚠️  Fichier .env créé à partir de .env.example.
-        echo     👉  IMPORTANT : ouvre le fichier .env et remplis tes clés :
-        echo         - NEXT_PUBLIC_SUPABASE_URL
-        echo         - SUPABASE_SERVICE_ROLE_KEY
-        echo         - OPENAI_API_KEY (si utilisé)
-        echo.
+echo [3/5] Configuration de l'environnement...
+if not exist ".env" (
+    if exist ".env.example" (
+        copy ".env.example" ".env" >nul
+        echo     ⚠️  Nouveau fichier .env créé.
     ) else (
-        echo     ❌  Aucun fichier .env ni .env.example trouvé.
-        echo.
-        pause
-        exit /b 1
+        call :handle_error "Fichier .env.example introuvable. Impossible d'initialiser l'environnement."
     )
 ) else (
-    echo     ✅  Fichier .env existant détecté.
+    echo     ✅  Fichier .env prêt.
 )
 echo.
 
@@ -72,26 +62,44 @@ REM  4. Installation des dépendances
 REM ──────────────────────────────────────────────────────────
 echo [4/5] Installation des dépendances (npm install)...
 echo     Cela peut prendre quelques minutes...
-echo.
-cd /d "%~dp0"
-call npm install --no-fund --no-audit
-if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo ❌  Échec de l'installation des dépendances.
-    echo.
-    pause
-    exit /b 1
+call npm install --no-fund --no-audit >nul 2>> "%ERR_LOG%"
+if !ERRORLEVEL! NEQ 0 (
+    call :handle_error "L'installation des dépendances a échoué. Consultez %ERR_LOG% pour plus de détails."
 )
 echo     ✅  Dépendances installées.
 echo.
 
 REM ──────────────────────────────────────────────────────────
-REM  5. Lancement du serveur de développement
+REM  5. Vérification Finale
 REM ──────────────────────────────────────────────────────────
+if exist "%ERR_LOG%" (
+    echo ⚠️  Des avertissements ont été enregistrés dans %ERR_LOG%
+    echo.
+)
+
 echo ══════════════════════════════════════════════════════
-echo   🚀  Lancement du serveur de développement...
-echo   📍  L'app sera disponible sur : http://localhost:3000
-echo   🛑  Pour arrêter : appuie sur Ctrl+C dans ce terminal
+echo   🚀  Prêt à lancer !
+echo   📍  App : http://localhost:3000
+echo   🛑  Quitter : Ctrl+C
 echo ══════════════════════════════════════════════════════
 echo.
-call npm run dev
+pause
+npm run dev
+exit /b 0
+
+:handle_error
+echo.
+echo ❌  ERREUR CRITIQUE : %~1
+echo ──────────────────────────────────────────────────────────
+if exist "%ERR_LOG%" (
+    echo Détails de l'erreur enregistrés dans %ERR_LOG%
+    type "%ERR_LOG%"
+)
+echo.
+echo Suggestions :
+echo 1. Vérifiez votre connexion internet.
+echo 2. Assurez-vous d'avoir les droits administrateur.
+echo 3. Essayez de supprimer 'node_modules' et de relancer.
+echo.
+pause
+exit /b 1
