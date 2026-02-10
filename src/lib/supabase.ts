@@ -16,8 +16,12 @@ export function createServiceClient() {
   });
 }
 
-// Public client (uses anon key, respects RLS)
+let publicClient: ReturnType<typeof createClient> | null = null;
+
+// Public client singleton (uses anon key, respects RLS)
 export function createPublicClient() {
+  if (publicClient) return publicClient;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -27,5 +31,8 @@ export function createPublicClient() {
     );
   }
 
-  return createClient(url, key);
+  publicClient = createClient(url, key);
+  return publicClient;
 }
+
+export const supabase = createPublicClient();

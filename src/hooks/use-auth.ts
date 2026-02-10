@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { createPublicClient } from '@/lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
 
@@ -7,9 +7,6 @@ export function useAuth() {
     const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Initialize client one-time (or memoize if needed, but createPublicClient is simple)
-    // Note: In strict mode, verify this doesn't create too many clients.
-    // Ideally, the client should be a singleton or from a context.
     const supabase = createPublicClient();
 
     useEffect(() => {
@@ -45,5 +42,10 @@ export function useAuth() {
         };
     }, []);
 
-    return { user, session, loading, supabase };
+    const adminEmails = ['quebecsaas@gmail.com', 'theuprisingstudio@gmail.com'];
+    const isAdminByEmail = user?.email ? adminEmails.includes(user.email.toLowerCase()) : false;
+    const isAdminByRole = user?.app_metadata?.role === 'admin' || user?.user_metadata?.role === 'admin';
+    const isAdmin = isAdminByEmail || isAdminByRole;
+
+    return { user, session, loading, supabase, isAdmin };
 }

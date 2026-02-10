@@ -56,6 +56,14 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Validate file size before memory intensive operations (max 25MB)
+        if (audioFile.size > 25 * 1024 * 1024) {
+            return NextResponse.json(
+                { error: 'Audio file too large (max 25MB).' },
+                { status: 413 }
+            );
+        }
+
         // Convert Blob → Buffer
         const arrayBuffer = await audioFile.arrayBuffer();
         const audioBuffer = Buffer.from(arrayBuffer);
@@ -64,14 +72,6 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 { error: 'Audio file is empty.' },
                 { status: 400 }
-            );
-        }
-
-        // Validate file size (max 25MB)
-        if (audioBuffer.length > 25 * 1024 * 1024) {
-            return NextResponse.json(
-                { error: 'Audio file too large (max 25MB).' },
-                { status: 413 }
             );
         }
 

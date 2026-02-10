@@ -90,13 +90,14 @@ export default function Home() {
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
           <span>Système opérationnel</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
             <MousePointerClick className="w-3 h-3" />
             <span>Toucher l'écran pour commencer</span>
           </div>
-          <Link href="/admin" className="opacity-0 hover:opacity-50 transition-opacity p-2">
-            π
+          <Link href="/admin" className="flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors p-1 group">
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity">Administration</span>
+            <span className="text-lg leading-none">π</span>
           </Link>
         </div>
       </footer>

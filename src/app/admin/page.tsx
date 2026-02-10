@@ -40,7 +40,10 @@ export default function AdminOverviewPage() {
 
     // Data Fetch
     useEffect(() => {
-        if (!user || !session) return; // Don't fetch if not logged in
+        if (!user || !session) {
+            if (!authLoading) setLoading(false);
+            return;
+        }
 
         fetch(`/api/admin/overview?tenantId=${TENANT_ID}`, {
             headers: {

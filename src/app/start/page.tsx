@@ -46,7 +46,7 @@ export default function StartBusinessPage() {
                         ))}
                     </div>
 
-                    <Link href="/audit" className="group relative inline-flex items-center justify-center px-12 py-6 text-xl font-medium text-white transition-all duration-200 bg-black dark:bg-white dark:text-black rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 hover:shadow-2xl hover:-translate-y-1 mt-12" type="button">
+                    <Link href="/audit" className="group relative inline-flex items-center justify-center px-12 py-6 text-xl font-medium text-white transition-all duration-200 bg-black dark:bg-white dark:text-black rounded-2xl hover:bg-gray-800 dark:hover:bg-gray-200 hover:shadow-2xl hover:-translate-y-1 mt-12">
                         <span>Lancer le guide interactif</span>
                         <ArrowRight className="ml-3 w-6 h-6 transition-transform group-hover:translate-x-1" />
                     </Link>
