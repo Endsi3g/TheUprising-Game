@@ -10,7 +10,7 @@ echo.
 REM ──────────────────────────────────────────────────────────
 REM  1. Vérifier que Node.js est installé
 REM ──────────────────────────────────────────────────────────
-echo [1/4] Vérification de Node.js...
+echo [1/5] Vérification de Node.js...
 where node >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -24,34 +24,40 @@ for /f "tokens=*" %%v in ('node -v') do set NODE_VERSION=%%v
 echo     ✅  Node.js %NODE_VERSION% détecté.
 
 REM ──────────────────────────────────────────────────────────
-REM  2. Vérifier que npm est installé
+REM  2. Vérifier que Docker est installé (Optionnel mais recommandé)
 REM ──────────────────────────────────────────────────────────
-echo [2/4] Vérification de npm...
-where npm >nul 2>&1
+echo [2/5] Vérification de Docker (pour Ollama)...
+where docker >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo ❌  npm n'est pas installé ou n'est pas dans le PATH.
-    echo.
-    pause
-    exit /b 1
+    echo     ⚠️  Docker n'est pas détecté. L'IA locale (Ollama) ne pourra pas être lancée automatiquement.
+    echo        Si vous utilisez OpenAI, vous pouvez ignorer ce message.
+) else (
+    echo     ✅  Docker détecté.
+    echo     🚀  Lancement de la stack Ollama (docker-compose up)...
+    docker-compose up -d >nul 2>&1
+    if %ERRORLEVEL% NEQ 0 (
+        echo     ⚠️  Échec du lancement de Docker Compose. Assurez-vous que Docker Desktop est lancé.
+    ) else (
+        echo     ✅  Stack IA locale initialisée.
+    )
 )
-for /f "tokens=*" %%v in ('npm -v') do set NPM_VERSION=%%v
-echo     ✅  npm v%NPM_VERSION% détecté.
 echo.
 
 REM ──────────────────────────────────────────────────────────
 REM  3. Fichier .env
 REM ──────────────────────────────────────────────────────────
-echo [3/4] Vérification du fichier .env...
+echo [3/5] Vérification du fichier .env...
 if not exist "%~dp0.env" (
     if exist "%~dp0.env.example" (
         copy "%~dp0.env.example" "%~dp0.env" >nul
         echo     ⚠️  Fichier .env créé à partir de .env.example.
-        echo     👉  IMPORTANT : ouvre le fichier .env et remplis tes clés API avant de continuer.
+        echo     👉  IMPORTANT : ouvre le fichier .env et remplis tes clés :
+        echo         - NEXT_PUBLIC_SUPABASE_URL
+        echo         - SUPABASE_SERVICE_ROLE_KEY
+        echo         - OPENAI_API_KEY (si utilisé)
         echo.
     ) else (
         echo     ❌  Aucun fichier .env ni .env.example trouvé.
-        echo     👉  Crée un fichier .env à la racine du projet avec tes variables d'environnement.
         echo.
         pause
         exit /b 1
@@ -64,25 +70,23 @@ echo.
 REM ──────────────────────────────────────────────────────────
 REM  4. Installation des dépendances
 REM ──────────────────────────────────────────────────────────
-echo [4/4] Installation des dépendances (npm install)...
+echo [4/5] Installation des dépendances (npm install)...
 echo     Cela peut prendre quelques minutes...
 echo.
 cd /d "%~dp0"
-call npm install
+call npm install --no-fund --no-audit
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo ❌  Échec de l'installation des dépendances.
-    echo     Vérifie les erreurs ci-dessus et réessaie.
     echo.
     pause
     exit /b 1
 )
-echo.
-echo     ✅  Dépendances installées avec succès.
+echo     ✅  Dépendances installées.
 echo.
 
 REM ──────────────────────────────────────────────────────────
-REM  Lancement du serveur de développement
+REM  5. Lancement du serveur de développement
 REM ──────────────────────────────────────────────────────────
 echo ══════════════════════════════════════════════════════
 echo   🚀  Lancement du serveur de développement...
