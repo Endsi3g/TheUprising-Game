@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { requireAdmin, isAuthError } from '@/lib/auth-middleware';
 
 export async function GET(request: NextRequest) {
     try {
+        // ── Auth: require admin ──────────────────────────────────────────
+        const auth = await requireAdmin(request);
+        if (isAuthError(auth)) return auth.error;
+
         const { searchParams } = new URL(request.url);
         const tenantId = searchParams.get('tenantId');
 
@@ -13,29 +18,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const supabase = createPublicClient();
-
-        // Auth Check
-        const authHeader = request.headers.get('Authorization');
-        const tokenMatch = authHeader?.match(/^Bearer\s+(.+)$/i);
-        if (!tokenMatch) {
-            return NextResponse.json({ error: 'Missing or malformed Authorization header' }, { status: 401 });
-        }
-        const token = tokenMatch[1];
-        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // Admin check (consistent with login page)
-        const adminEmails = ['quebecsaas@gmail.com', 'theuprisingstudio@gmail.com'];
-        const isAdminByEmail = user.email ? adminEmails.includes(user.email.toLowerCase()) : false;
-        const isAdminByRole = user.app_metadata?.role === 'admin' || user.user_metadata?.role === 'admin';
-
-        if (!isAdminByEmail && !isAdminByRole) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
+        const supabase = createServiceClient();
 
         // Total sessions
         const { count: sessionsCount, error: dbError } = await supabase

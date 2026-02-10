@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { validateUrlForFetch } from '@/lib/ssrf-guard';
 
 export interface CrawlResult {
     title: string;
@@ -17,10 +18,16 @@ export interface CrawlResult {
  * Returns a structured crawl result with a text summary suitable for LLM context.
  */
 export async function crawlUrl(url: string): Promise<CrawlResult> {
+    // ── SSRF Protection ──────────────────────────────────────────────────
+    const urlCheck = await validateUrlForFetch(url);
+    if (!urlCheck.valid) {
+        throw new Error(`URL validation failed: ${urlCheck.error}`);
+    }
+
     // Fetch HTML with timeout and realistic user agent
-    const { data: html } = await axios.get(url, {
+    const { data: html } = await axios.get(urlCheck.resolvedUrl ?? url, {
         timeout: 15000,
-        maxRedirects: 5,
+        maxRedirects: 3, // Reduced from 5 to limit redirect chains
         headers: {
             'User-Agent':
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',

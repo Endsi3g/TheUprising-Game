@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
+import { requireAdmin, isAuthError } from '@/lib/auth-middleware';
 
 export async function GET(request: NextRequest) {
+    // ── Auth: require admin ──────────────────────────────────────────────
+    const auth = await requireAdmin(request);
+    if (isAuthError(auth)) return auth.error;
+
     try {
         const { searchParams } = new URL(request.url);
         const tenantId = searchParams.get('tenantId');

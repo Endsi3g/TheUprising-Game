@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { textToSpeech } from '@/lib/tts-service';
+import { rateLimitGuard } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+    // ── Rate limiting (10 req/min per IP) ────────────────────────────────
+    const limited = rateLimitGuard(req, { prefix: 'tts', max: 10 });
+    if (limited) return limited;
+
     try {
         const body = await req.json();
-        console.log('[TTS API] Received body:', body);
         const { text, voiceId } = body;
 
         if (!text) {
@@ -29,8 +33,9 @@ export async function POST(req: NextRequest) {
             },
         });
 
-    } catch (error: any) {
-        console.error('TTS API Error:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Internal Server Error';
+        console.error('[TTS API] Error:', message);
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }
