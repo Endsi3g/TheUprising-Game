@@ -3,11 +3,17 @@ import { createServiceClient } from '@/lib/supabase';
 import { SendMessageSchema } from '@/lib/validators';
 import { chat } from '@/lib/llm';
 import type { ConversationMessage, Language } from '@/types/database';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    if (!checkRateLimit(ip, 'session-message', { limit: 30, windowMs: 60 * 1000 })) {
+        return rateLimitResponse();
+    }
+
     try {
         const { id: sessionId } = await params;
         const body = await request.json();

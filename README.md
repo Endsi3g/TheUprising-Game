@@ -96,6 +96,11 @@ Variables utiles :
 - `SERPAPI_KEY` ou `SEARCH_API_KEY` active un moteur de recherche distant.
 - Sans clé, un fallback Puppeteer est utilisé.
 
+## Catalogue
+
+- Si Supabase est configuré, l'API `GET /api/catalogue` lit la table définie par `CATALOGUE_TABLE` (par défaut `catalogue_items`).
+- Sans configuration Supabase, un catalogue mock est renvoyé.
+
 ## Structure du projet
 
 - `src/` : pages, composants, hooks.

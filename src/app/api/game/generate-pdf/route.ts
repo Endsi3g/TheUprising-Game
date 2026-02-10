@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import PDFDocument from 'pdfkit';
 import type { ReportJson } from '@/types/database';
+import { GeneratePdfSchema } from '@/lib/validators';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 type PdfPayload = {
     report?: ReportJson;
@@ -8,14 +10,24 @@ type PdfPayload = {
 };
 
 export async function POST(req: Request) {
-    try {
-        const payload = (await req.json()) as ReportJson | PdfPayload;
-        const report = 'report' in payload ? payload.report : payload;
-        const title = 'report' in payload ? payload.title : undefined;
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    if (!checkRateLimit(ip, 'generate-pdf', { limit: 10, windowMs: 60 * 1000 })) {
+        return rateLimitResponse();
+    }
 
-        if (!report || !Array.isArray(report.sections)) {
-            return NextResponse.json({ error: 'Invalid report data' }, { status: 400 });
+    try {
+        const payload = await req.json();
+        const parsed = GeneratePdfSchema.safeParse(payload);
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: 'Invalid report data', details: parsed.error.flatten() },
+                { status: 400 }
+            );
         }
+
+        const value = parsed.data;
+        const report = 'report' in value ? value.report : value;
+        const title = 'report' in value ? value.title : undefined;
 
         // Create a PDF document
         const doc = new PDFDocument({ margin: 50 });

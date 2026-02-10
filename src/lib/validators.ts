@@ -129,6 +129,11 @@ export const SpeakTextSchema = z.object({
     stream: z.boolean().optional().default(false),
 });
 
+export const TtsSchema = z.object({
+    text: z.string().min(1).max(5000),
+    language: LanguageSchema.optional().default('fr'),
+});
+
 // ─── Type Inference ───────────────────────────────────────────────────────────
 
 export type StartSessionInput = z.infer<typeof StartSessionSchema>;
@@ -139,3 +144,7 @@ export type SendEmailInput = z.infer<typeof SendEmailSchema>;
 export type AdminOverviewInput = z.infer<typeof AdminOverviewSchema>;
 export type TranscribeAudioInput = z.infer<typeof TranscribeAudioSchema>;
 export type SpeakTextInput = z.infer<typeof SpeakTextSchema>;
+export type TtsInput = z.infer<typeof TtsSchema>;
+export type GenerateReportInput = z.infer<typeof GenerateReportSchema>;
+export type GeneratePdfInput = z.infer<typeof GeneratePdfSchema>;
+export type ContactInput = z.infer<typeof ContactSchema>;

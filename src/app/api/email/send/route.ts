@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { SendEmailSchema } from '@/lib/validators';
 import { sendReportEmail } from '@/lib/email';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    if (!checkRateLimit(ip, 'email-send', { limit: 5, windowMs: 60 * 1000 })) {
+        return rateLimitResponse();
+    }
+
     try {
         const body = await request.json();
         const parsed = SendEmailSchema.safeParse(body);

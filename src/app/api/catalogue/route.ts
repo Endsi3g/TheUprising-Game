@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { CatalogueItem } from '@/types/database';
+import { createPublicClient } from '@/lib/supabase';
 
 // Mock data until Supabase table is ready
 const MOCK_CATALOGUE: CatalogueItem[] = [
@@ -51,14 +52,34 @@ export async function GET(request: Request) {
     const slug = searchParams.get('slug');
     const id = searchParams.get('id');
 
-    // TODO: Connect to real Supabase
-    // const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
-    // let query = supabase.from('posts').select('*');
-    // if (slug) query = query.eq('slug', slug);
-    // if (id) query = query.eq('id', id);
-    // const { data, error } = await query;
-    // if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    // return NextResponse.json(data);
+    const hasSupabaseEnv =
+        !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+        !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (hasSupabaseEnv) {
+        try {
+            const supabase = createPublicClient();
+            const table = process.env.CATALOGUE_TABLE || 'catalogue_items';
+            let query = supabase.from(table).select('*');
+
+            if (slug) {
+                query = query.eq('id', slug);
+            }
+            if (id) {
+                query = query.eq('id', id);
+            }
+
+            const { data, error } = await query;
+            if (error) {
+                console.error('[Catalogue] Supabase error:', error);
+                return NextResponse.json({ error: 'Failed to fetch catalogue' }, { status: 500 });
+            }
+
+            return NextResponse.json(data ?? []);
+        } catch (error) {
+            console.error('[Catalogue] Supabase unavailable, falling back to mock data.', error);
+        }
+    }
 
     let data = MOCK_CATALOGUE;
 
