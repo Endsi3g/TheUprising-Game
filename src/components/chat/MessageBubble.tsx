@@ -1,7 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { User, Bot } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface MessageBubbleProps {
     role: "user" | "assistant";
@@ -43,8 +44,22 @@ export function MessageBubble({ role, content, isThinking }: MessageBubbleProps)
             </Avatar>
 
             <div className="flex-1 space-y-2 overflow-hidden">
-                <div className="prose prose-zinc dark:prose-invert max-w-none text-sm leading-relaxed whitespace-pre-wrap">
-                    {content}
+                <div className="prose prose-zinc dark:prose-invert max-w-none text-sm leading-relaxed">
+                    <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                            h1: ({ ...props }) => <h1 className="text-xl font-bold mt-4 mb-2" {...props} />,
+                            h2: ({ ...props }) => <h2 className="text-lg font-bold mt-3 mb-2" {...props} />,
+                            h3: ({ ...props }) => <h3 className="text-md font-bold mt-2 mb-1" {...props} />,
+                            ul: ({ ...props }) => <ul className="list-disc ml-4 space-y-1 mb-4" {...props} />,
+                            ol: ({ ...props }) => <ol className="list-decimal ml-4 space-y-1 mb-4" {...props} />,
+                            li: ({ ...props }) => <li className="pl-1" {...props} />,
+                            p: ({ ...props }) => <p className="mb-4 last:mb-0" {...props} />,
+                            strong: ({ ...props }) => <strong className="font-bold text-gray-900 dark:text-gray-100" {...props} />,
+                        }}
+                    >
+                        {content}
+                    </ReactMarkdown>
                 </div>
             </div>
         </div>

@@ -1,8 +1,10 @@
 'use client';
 
-
 import Link from 'next/link';
 import { LayoutGrid, ArrowLeft, ArrowRight, ArrowUpRight, Monitor, Smartphone, ShoppingBag } from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 const projects = [
     {
@@ -12,7 +14,8 @@ const projects = [
         description: "Une interface éducative intuitive conçue pour maximiser l'engagement des étudiants avec des parcours personnalisés.",
         category: "Web Design",
         icon: Monitor,
-        delay: '0.1s'
+        image: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=1200",
+        color: "from-blue-500/20 to-indigo-500/20"
     },
     {
         id: 2,
@@ -21,7 +24,8 @@ const projects = [
         description: "Tableau de bord complet permettant de visualiser des données complexes traitées par intelligence artificielle en temps réel.",
         category: "SaaS B2B",
         icon: Smartphone,
-        delay: '0.2s'
+        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200",
+        color: "from-purple-500/20 to-pink-500/20"
     },
     {
         id: 3,
@@ -30,24 +34,37 @@ const projects = [
         description: "Refonte complète de l'expérience utilisateur pour une place de marché dédiée aux produits biologiques et locaux.",
         category: "E-Commerce",
         icon: ShoppingBag,
-        delay: '0.3s'
+        image: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=1200",
+        color: "from-green-500/20 to-emerald-500/20"
     }
 ];
 
-import { useRef } from 'react';
-
 export default function PortfolioPage() {
     const carouselRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
 
-    const scrollPrev = () => {
+    const checkScroll = () => {
         if (carouselRef.current) {
-            carouselRef.current.scrollBy({ left: -carouselRef.current.clientWidth * 0.8, behavior: 'smooth' });
+            const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
+            setCanScrollLeft(scrollLeft > 10);
+            setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
         }
     };
 
-    const scrollNext = () => {
+    useEffect(() => {
+        checkScroll();
+        window.addEventListener('resize', checkScroll);
+        return () => window.removeEventListener('resize', checkScroll);
+    }, []);
+
+    const scroll = (direction: 'left' | 'right') => {
         if (carouselRef.current) {
-            carouselRef.current.scrollBy({ left: carouselRef.current.clientWidth * 0.8, behavior: 'smooth' });
+            const scrollAmount = carouselRef.current.clientWidth * 0.8;
+            carouselRef.current.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
         }
     };
 
@@ -55,93 +72,165 @@ export default function PortfolioPage() {
         <div className="min-h-screen flex flex-col overflow-hidden bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 font-sans selection:bg-gray-200 dark:selection:bg-gray-700">
 
             {/* Header */}
-            <header className="w-full px-8 py-6 flex justify-between items-center z-10">
-                <Link href="/" className="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
-                    <LayoutGrid className="w-5 h-5" />
-                    <span className="text-sm font-medium tracking-wide">KIOSK v2.0</span>
-                </Link>
-                <div className="flex items-center gap-4">
-                    <div className="text-right hidden sm:block">
-                        <p className="text-xs font-medium text-gray-500">Guide Interactif</p>
-                        <p className="text-sm font-bold">Découvrez nos pépites</p>
+            <header className="w-full px-8 py-6 flex justify-between items-center z-20">
+                <Link href="/" className="flex items-center gap-2 group">
+                    <div className="w-10 h-10 rounded-xl bg-black dark:bg-white flex items-center justify-center transition-transform group-hover:rotate-12">
+                        <LayoutGrid className="w-5 h-5 text-white dark:text-black" />
                     </div>
+                    <span className="text-sm font-black tracking-tighter">THE UPRISING</span>
+                </Link>
+                <div className="flex items-center gap-6">
+                    <div className="text-right hidden sm:block">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Portfolio</p>
+                        <p className="text-sm font-black tracking-tight">Showcase v2.0</p>
+                    </div>
+                    <Link href="/contact" className="px-5 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-full text-xs font-black hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
+                        Démarrer un projet
+                    </Link>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main className="flex-grow flex flex-col relative w-full h-full">
+            <main className="flex-grow flex flex-col relative w-full overflow-hidden">
                 {/* Background Blobs */}
-                <div className="absolute top-1/4 left-10 w-96 h-96 bg-gray-50 rounded-full mix-blend-multiply filter blur-3xl opacity-40"></div>
-                <div className="absolute bottom-10 right-10 w-80 h-80 bg-gray-50 rounded-full mix-blend-multiply filter blur-3xl opacity-40"></div>
+                <div className="absolute top-1/4 left-10 w-96 h-96 bg-blue-100/30 dark:bg-blue-900/10 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse"></div>
+                <div className="absolute bottom-10 right-10 w-80 h-80 bg-purple-100/30 dark:bg-purple-900/10 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse delay-700"></div>
 
-                <div className="z-10 w-full h-full flex flex-col max-w-[1920px] mx-auto px-8 md:px-16 lg:px-24 pt-4 pb-8">
+                <div className="z-10 w-full h-full flex flex-col max-w-[1920px] mx-auto px-8 md:px-16 lg:px-24 pt-12 pb-8">
 
                     {/* Page Title & Navigation */}
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
-                        <div>
-                            <span className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-2 block">Portfolio</span>
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
-                                Nos Projets & Réalisations
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-10">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                        >
+                            <span className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.3em] mb-4 block">Nos Réalisations</span>
+                            <h1 className="text-6xl md:text-8xl font-black text-gray-900 dark:text-white tracking-tight leading-[0.8] mb-6">
+                                Crafting <br />Digital <span className="text-gray-300 dark:text-gray-700">Icons</span>
                             </h1>
-                        </div>
-                        <div className="flex gap-4">
-                            <button onClick={scrollPrev} aria-label="Previous project" className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition-all duration-300">
-                                <ArrowLeft className="w-5 h-5" />
+                        </motion.div>
+
+                        <div className="flex gap-4 mb-2">
+                            <button
+                                onClick={() => scroll('left')}
+                                disabled={!canScrollLeft}
+                                className={cn(
+                                    "w-16 h-16 rounded-2xl border border-gray-200 dark:border-gray-800 flex items-center justify-center transition-all duration-300",
+                                    canScrollLeft ? "hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black hover:border-transparent active:scale-90" : "opacity-30 cursor-not-allowed"
+                                )}
+                            >
+                                <ArrowLeft className="w-6 h-6" />
                             </button>
-                            <button onClick={scrollNext} aria-label="Next project" className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center hover:bg-gray-800 transition-all duration-300 shadow-lg">
-                                <ArrowRight className="w-5 h-5" />
+                            <button
+                                onClick={() => scroll('right')}
+                                disabled={!canScrollRight}
+                                className={cn(
+                                    "w-16 h-16 rounded-2xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center transition-all duration-300 shadow-xl",
+                                    canScrollRight ? "hover:scale-105 active:scale-95" : "opacity-30 cursor-not-allowed"
+                                )}
+                            >
+                                <ArrowRight className="w-6 h-6" />
                             </button>
                         </div>
                     </div>
 
                     {/* Project Cards (Horizontal Scroll) */}
-                    <div className="flex-grow relative overflow-hidden flex items-center">
-                        <div ref={carouselRef} className="flex gap-8 overflow-x-auto hide-scrollbar snap-x snap-mandatory px-2 pb-8 w-full h-full items-center">
+                    <div className="flex-grow relative w-full">
+                        <div
+                            ref={carouselRef}
+                            onScroll={checkScroll}
+                            className="flex gap-10 overflow-x-auto hide-scrollbar snap-x snap-mandatory px-2 pb-12 w-full items-stretch"
+                        >
+                            <AnimatePresence>
+                                {projects.map((project, idx) => (
+                                    <motion.div
+                                        key={project.id}
+                                        initial={{ opacity: 0, x: 50 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: idx * 0.1 }}
+                                        className="snap-center"
+                                    >
+                                        <Link
+                                            href={`/portfolio/${project.slug}`}
+                                            className="relative block flex-shrink-0 w-[85vw] md:w-[600px] lg:w-[800px] bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 rounded-[2.5rem] overflow-hidden shadow-2xl hover:shadow-card-hover transition-all duration-500 group cursor-pointer h-full"
+                                        >
+                                            {/* Image container */}
+                                            <div className="w-full aspect-[21/9] md:aspect-[16/8] relative overflow-hidden">
+                                                <div className={cn("absolute inset-0 bg-gradient-to-br opacity-50 z-10", project.color)} />
+                                                <img
+                                                    src={project.image}
+                                                    alt={project.title}
+                                                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                                                />
+                                                <div className="absolute top-6 left-6 z-20">
+                                                    <span className="px-4 py-2 text-[10px] font-black uppercase tracking-widest bg-white/90 dark:bg-black/90 text-black dark:text-white rounded-xl backdrop-blur-md shadow-lg border border-white/20">
+                                                        {project.category}
+                                                    </span>
+                                                </div>
+                                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
+                                                    <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center scale-0 group-hover:scale-100 transition-transform duration-500">
+                                                        <ArrowUpRight className="w-8 h-8 text-white" />
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                            {projects.map((project) => (
-                                <Link href={`/portfolio/${project.slug}`} key={project.id} className="relative flex-shrink-0 w-[400px] md:w-[480px] lg:w-[600px] bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300 snap-center group cursor-pointer">
-                                    <div className="w-full aspect-video bg-gray-100 dark:bg-black/20 border-b border-gray-100 dark:border-gray-700/50 relative overflow-hidden">
-                                        <div className="absolute inset-0 flex items-center justify-center text-gray-300 dark:text-gray-600">
-                                            <project.icon className="w-16 h-16 opacity-20" />
-                                        </div>
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            {/* Content */}
+                                            <div className="p-10 md:p-14 space-y-6">
+                                                <div className="flex justify-between items-center">
+                                                    <h3 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tighter">{project.title}</h3>
+                                                    <project.icon className="w-8 h-8 text-gray-200 dark:text-gray-800" />
+                                                </div>
+                                                <p className="text-xl text-gray-500 dark:text-gray-400 leading-relaxed font-medium max-w-2xl">
+                                                    {project.description}
+                                                </p>
+                                                <div className="pt-4 flex items-center gap-4 text-sm font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest group/link">
+                                                    Voir le Case Study
+                                                    <ArrowRight className="w-4 h-4 transition-transform group-hover/link:translate-x-2" />
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+
+                            {/* Enhanced View All Card */}
+                            <motion.div
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: projects.length * 0.1 }}
+                                className="snap-center"
+                            >
+                                <Link
+                                    href="/catalogue"
+                                    className="relative flex-shrink-0 w-[40vw] md:w-[300px] bg-transparent border-[3px] border-dashed border-gray-200 dark:border-gray-800 rounded-[2.5rem] flex flex-col items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-900/50 hover:border-gray-400 dark:hover:border-gray-600 transition-all duration-500 cursor-pointer group h-full min-h-[500px]"
+                                >
+                                    <div className="w-24 h-24 rounded-full bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 flex items-center justify-center mb-8 shadow-xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
+                                        <LayoutGrid className="text-gray-400 w-10 h-10 group-hover:text-black dark:group-hover:text-white transition-colors" />
                                     </div>
-                                    <div className="p-8">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <span className="px-3 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-full">{project.category}</span>
-                                            <ArrowUpRight className="text-gray-400 group-hover:text-black dark:group-hover:text-white transition-colors w-5 h-5" />
-                                        </div>
-                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{project.title}</h3>
-                                        <p className="text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
-                                            {project.description}
-                                        </p>
+                                    <div className="text-center px-8">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Discovery</p>
+                                        <h4 className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter mb-4">Voir tout le catalogue</h4>
+                                        <div className="w-12 h-1 bg-blue-600 mx-auto rounded-full group-hover:w-20 transition-all" />
                                     </div>
                                 </Link>
-                            ))}
-
-                            {/* View All Card */}
-                            <div className="relative flex-shrink-0 w-[200px] md:w-[250px] bg-transparent border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col items-center justify-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer snap-center group h-[400px]">
-                                <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-surface-dark flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                    <ArrowRight className="text-gray-400 w-6 h-6" />
-                                </div>
-                                <span className="text-sm font-medium text-gray-500">Voir tout le catalogue</span>
-                            </div>
+                            </motion.div>
 
                         </div>
                     </div>
 
-                    {/* Footer Navigation */}
-                    <div className="mt-4 flex justify-between items-center border-t border-gray-100 dark:border-gray-800 pt-6">
-                        <Link href="/" className="group flex items-center gap-3 px-6 py-3 rounded-full hover:bg-gray-100 dark:hover:bg-surface-dark transition-colors text-gray-900 dark:text-white">
-                            <div className="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center group-hover:border-black dark:group-hover:border-white transition-colors bg-white dark:bg-transparent">
-                                <ArrowLeft className="text-sm w-4 h-4" />
-                            </div>
-                            <span className="font-medium text-sm">Retour à l&apos;accueil</span>
+                    {/* Footer Progress & Back */}
+                    <div className="mt-8 flex flex-col md:flex-row justify-between items-center border-t border-gray-100 dark:border-gray-800 pt-10 gap-8">
+                        <Link href="/" className="group flex items-center gap-4 px-8 py-4 rounded-2xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all duration-300 font-bold shadow-sm">
+                            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-2" />
+                            <span className="text-sm">Retour à l&apos;accueil</span>
                         </Link>
-                        <div className="flex gap-2">
-                            <span className="w-2 h-2 rounded-full bg-black dark:bg-white"></span>
-                            <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-700"></span>
-                            <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-700"></span>
+                        <div className="flex gap-4 items-center">
+                            <p className="text-xs font-black uppercase tracking-widest text-gray-400">Navigate our work</p>
+                            <div className="flex gap-3">
+                                {[0, 1, 2].map(i => (
+                                    <div key={i} className={cn("h-1.5 rounded-full transition-all duration-500", i === 0 ? "w-12 bg-blue-600" : "w-3 bg-gray-200 dark:bg-gray-800")} />
+                                ))}
+                            </div>
                         </div>
                     </div>
 

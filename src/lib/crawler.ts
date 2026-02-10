@@ -1,5 +1,7 @@
 import axios from 'axios';
+import axios from 'axios';
 import * as cheerio from 'cheerio';
+import puppeteer from 'puppeteer';
 
 export interface CrawlResult {
     title: string;
@@ -10,6 +12,94 @@ export interface CrawlResult {
     ctas: string[];
     images: { alt: string; src: string }[];
     summary: string;
+}
+
+export interface SearchResult {
+    title: string;
+    url: string;
+    snippet: string;
+}
+
+async function searchWithSerpApi(query: string, apiKey: string): Promise<SearchResult[]> {
+    const { data } = await axios.get('https://serpapi.com/search.json', {
+        params: {
+            q: query,
+            api_key: apiKey,
+            engine: 'google',
+            num: 5,
+        },
+        timeout: 15000,
+    });
+
+    const results = Array.isArray(data?.organic_results) ? data.organic_results : [];
+    return results
+        .map((result: any) => ({
+            title: result?.title?.toString() ?? '',
+            url: result?.link?.toString() ?? '',
+            snippet: result?.snippet?.toString() ?? '',
+        }))
+        .filter((result: SearchResult) => result.title && result.url)
+        .slice(0, 5);
+}
+
+async function searchWithPuppeteer(query: string): Promise<SearchResult[]> {
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+
+    try {
+        const page = await browser.newPage();
+        page.setDefaultTimeout(20000);
+        page.setDefaultNavigationTimeout(20000);
+        await page.setUserAgent(
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        );
+
+        const searchUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+        await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
+
+        const html = await page.content();
+        const $ = cheerio.load(html);
+        const results: SearchResult[] = [];
+
+        $('.result').each((_, el) => {
+            if (results.length >= 5) return;
+            const linkEl = $(el).find('.result__a').first();
+            const snippetEl = $(el).find('.result__snippet').first();
+            const title = linkEl.text().trim();
+            const url = linkEl.attr('href')?.trim() || '';
+            const snippet = snippetEl.text().trim();
+            if (title && url) {
+                results.push({ title, url, snippet });
+            }
+        });
+
+        return results;
+    } finally {
+        await browser.close();
+    }
+}
+
+export async function searchWeb(query: string): Promise<SearchResult[]> {
+    const trimmed = query.trim();
+    if (!trimmed) return [];
+
+    const apiKey = process.env.SERPAPI_KEY || process.env.SEARCH_API_KEY;
+    if (apiKey) {
+        try {
+            return await searchWithSerpApi(trimmed, apiKey);
+        } catch (error) {
+            console.warn('[crawler] Search API failed, falling back to Puppeteer.', error);
+        }
+    }
+
+    try {
+        return await searchWithPuppeteer(trimmed);
+    } catch (error) {
+        console.warn('[crawler] Puppeteer search failed.', error);
+        return [];
+    }
 }
 
 /**
@@ -46,8 +136,8 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
 
     // Fetch HTML with timeout and realistic user agent
     const { data: html } = await axios.get(url, {
-        timeout: 10000, // Reduced from 15s for stricter control
-        maxRedirects: 3, // Reduced from 5
+        timeout: 10000,
+        maxRedirects: 3,
         headers: {
             'User-Agent':
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -56,7 +146,6 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
             'Accept-Language': 'fr-CA,fr;q=0.9,en-US;q=0.8,en;q=0.7',
         },
         responseType: 'text',
-        // Prevent axios from following redirects to unsafe protocols if possible (axios follows HTTP redirects by default)
     });
 
     const $ = cheerio.load(html);
@@ -96,7 +185,7 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
         }
     });
 
-    // --- Extract CTAs (buttons, .cta, data-cta, [type=submit]) ---
+    // --- Extract CTAs ---
     const ctas: string[] = [];
     $('button, .cta, [data-cta], input[type="submit"], a.btn, a.button').each(
         (_: number, el: any) => {
@@ -108,7 +197,7 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
         }
     );
 
-    // --- Extract images with alt text ---
+    // --- Extract images ---
     const images: { alt: string; src: string }[] = [];
     $('img').each((_: number, el: any) => {
         const alt = $(el).attr('alt')?.trim() || '';
@@ -118,7 +207,7 @@ export async function crawlUrl(url: string): Promise<CrawlResult> {
         }
     });
 
-    // --- Generate text summary for LLM context ---
+    // --- Generate text summary ---
     const summaryParts: string[] = [];
 
     summaryParts.push(`Title: ${title}`);

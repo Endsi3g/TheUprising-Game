@@ -1,19 +1,24 @@
 import { NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { z } from 'zod';
-
-const ContactSchema = z.object({
-    firstName: z.string().min(2),
-    email: z.string().email(),
-    companyName: z.string().optional(),
-    projectType: z.enum(['audit', 'startup', 'portfolio', 'other']),
-    message: z.string().min(10),
-});
+import { ContactSchema } from '@/lib/validators';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    if (!checkRateLimit(ip, 'contact', { limit: 5, windowMs: 60 * 1000 })) {
+        return rateLimitResponse();
+    }
+
     try {
         const body = await req.json();
-        const validated = ContactSchema.parse(body);
+        const parsed = ContactSchema.safeParse(body);
+        if (!parsed.success) {
+            return NextResponse.json(
+                { error: 'Validation failed', details: parsed.error.flatten() },
+                { status: 400 }
+            );
+        }
+        const validated = parsed.data;
 
         const supabase = createServiceClient();
 
@@ -37,9 +42,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: true, leadId: data.id });
     } catch (error) {
         console.error('[API] Contact submission error:', error);
-        if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: 'Validation failed', details: error.issues }, { status: 400 });
-        }
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

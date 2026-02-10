@@ -1,40 +1,57 @@
-# 🎮 The Uprising Game (salon-ai)
+﻿# The Uprising Game (salon-ai)
 
-> [!IMPORTANT]  
-> **État du Projet (Février 2026) :** L'application est en phase de production. Les fonctionnalités de persistance Supabase, le chatbot interactif et les rapports d'audit sont pleinement opérationnels.
+**État du projet (février 2026)** : l’application est en production, avec persistance Supabase, chatbot interactif et rapports d’audit actifs.
 
-**The Uprising Game** est une expérience interactive conçue spécifiquement pour les salons et événements. Il s'agit d'un jeu piloté par une intelligence artificielle conversationnelle où un personnage animé interagit avec les utilisateurs pour explorer leur univers professionnel.
+The Uprising Game est une expérience immersive pour salons et événements. Un personnage animé guide les visiteurs, capte des informations clés sur leur activité, et génère un rapport d’audit actionnable. Le tout est conçu pour maximiser l’engagement, la conversion et la collecte de leads.
 
-## 🚀 Fonctionnalités Clés
+## Objectif du produit
 
-- **Audit Multi-Agents** : Analyse SEO, Copywriting, UX et Design automatisée.
-- **Persistance Supabase** : Sauvegarde en temps réel des sessions, de l'historique de chat et des rapports.
-- **Interaction Vocale & Texte** : Support pour le micro (Eleven Labs / Vosk) et le texte.
-- **Génération de Leads** : Capture automatique des contacts dans la base de données.
-- **Support Multi-LLM** : Compatible avec Ollama (local), OpenAI (gpt-4o) et Grok.
+- Créer une expérience “waouh” en stand ou showroom.
+- Qualifier rapidement une entreprise (ou une idée) via un parcours simple.
+- Produire un rapport utile et téléchargeable en PDF.
+- Enregistrer chaque interaction pour un suivi commercial propre.
 
-## 🕹️ Modes de Jeu
+## Fonctionnalités principales
 
-1. **Démarrage Entreprise** : Accompagnement pas à pas pour structurer une nouvelle idée.
-2. **Portfolio par Niche** : Galerie des projets avec carousel et templates sectoriels.
-3. **Audit Site Existant** : Analyse critique et suggestions d'amélioration avec rapport détaillé.
+- **Audit multi‑agents** : analyse SEO, copywriting, UX et design.
+- **Chatbot interactif** : texte + voix (micro) selon la configuration.
+- **Persistance Supabase** : sessions, historique, rapports, leads.
+- **Rapport enrichi** : rendu Markdown structuré dans le chat.
+- **Export PDF** : génération instantanée via endpoint dédié.
+- **Recherche web** : enrichissement des audits par contexte marché.
+- **Support multi‑LLM** : Ollama local, OpenAI, Gemini.
 
-## 🛠️ Stack Technique
+## Parcours utilisateur (de bout en bout)
 
-- **Frontend** : [Next.js 16](https://nextjs.org/), React 19, Tailwind CSS 4.
-- **Backend** : [Supabase](https://supabase.com/) (Database, Auth, Leads).
-- **IA** : Custom Multi-Agent Orchestrator avec support Ollama & OpenAI.
-- **Infrastructure** : [Docker](https://www.docker.com/) pour le déploiement local de l'IA.
+1. L’utilisateur choisit un mode (Audit / Startup / Portfolio).
+2. Il saisit son entreprise (session créée en base).
+3. Le chatbot guide la conversation (messages sauvegardés en temps réel).
+4. L’IA génère un rapport (persisté et disponible à tout moment).
+5. Redirection automatique vers la page résultats.
+6. Les données sont visibles dans `sessions` et `leads`.
 
-## 🏁 Commencer
+## Modes de jeu
 
-### Installation Rapide (Windows)
+1. **Démarrage entreprise** : structuration d’idée, business model, positionnement.
+2. **Portfolio par niche** : démonstration sectorielle avec templates ciblés.
+3. **Audit de site existant** : analyse critique et recommandations concrètes.
 
-1. Clonez le dépôt.
-2. Double-cliquez sur `setup-localhost.bat`.
-3. Le script configurera vos dépendances, votre `.env` et lancera la stack Ollama via Docker.
+## Stack technique
 
-### Installation Manuelle
+- **Frontend** : Next.js 16, React 19, Tailwind CSS 4.
+- **Backend** : Supabase (DB, Auth, Leads).
+- **IA** : orchestrateur multi‑agents avec Ollama, OpenAI, Gemini.
+- **Infra** : Docker pour l’écosystème IA local.
+
+## Démarrage
+
+Installation rapide (Windows) :
+
+1. Cloner le dépôt.
+2. Lancer `setup-localhost.bat`.
+3. Le script configure les dépendances, le `.env`, et lance Ollama via Docker.
+
+Installation manuelle :
 
 ```bash
 # 1. Installer les dépendances
@@ -46,21 +63,46 @@ docker-compose up -d
 # 3. Télécharger les modèles (si utilisation locale)
 scripts/setup-ollama.bat
 
-# 4. Configurer l'environnement (Supabase & LLM keys)
+# 4. Configurer l'environnement
 cp .env.example .env
 
-# 4. Lancer le serveur de développement
+# 5. Lancer le serveur
 npm run dev
 ```
 
-Ouvrez [http://localhost:3000](http://localhost:3000) pour voir le résultat.
+Ouvrir `http://localhost:3000`.
 
-## 📂 Structure du Projet
+## Tests E2E (Playwright)
 
-- `src/` : Code source (pages, composants, hooks).
-- `supabase/` : Migrations et schémas de base de données.
-- `scripts/` : Utilitaires de test et setup Ollama.
-- `docker-compose.yml` : Orchestration des services IA locaux.
+```bash
+# Installer les navigateurs Playwright (une seule fois)
+npx playwright install
+
+# Lancer les tests E2E
+npm run test:e2e
+```
+
+Variables utiles :
+- `PLAYWRIGHT_BASE_URL` : URL de base si vous n’utilisez pas `http://localhost:3000`.
+
+## API PDF
+
+- Endpoint : `POST /api/game/generate-pdf`
+- Payload : `{ report, title }` ou `report` conforme à `ReportJson`.
+- Retour : PDF téléchargeable (`application/pdf`).
+
+## Recherche web
+
+- `SERPAPI_KEY` ou `SEARCH_API_KEY` active un moteur de recherche distant.
+- Sans clé, un fallback Puppeteer est utilisé.
+
+## Structure du projet
+
+- `src/` : pages, composants, hooks.
+- `supabase/` : migrations et schémas de base.
+- `scripts/` : utilitaires de test et setup Ollama.
+- `docker-compose.yml` : orchestration des services IA locaux.
 
 ---
-*Ce projet est une initiative de l'équipe **The Uprising**.*
+
+Projet porté par l’équipe The Uprising.

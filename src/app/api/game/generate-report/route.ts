@@ -1,21 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateReport } from '@/lib/llm';
 import { createServiceClient } from '@/lib/supabase';
+import { GenerateReportSchema } from '@/lib/validators';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export const maxDuration = 60; // Allow longer timeout for report generation
 
 export async function POST(req: NextRequest) {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    if (!checkRateLimit(ip, 'generate-report', { limit: 5, windowMs: 60 * 1000 })) {
+        return rateLimitResponse();
+    }
+
     try {
         const body = await req.json();
-        const { mode, niche, language, history, auditHtmlSummary, sessionId } = body;
-
-        // Validation
-        if (!mode || !niche || !language || !history) {
+        const parsed = GenerateReportSchema.safeParse(body);
+        if (!parsed.success) {
             return NextResponse.json(
-                { error: 'Missing required fields' },
+                { error: 'Invalid request', details: parsed.error.flatten() },
                 { status: 400 }
             );
         }
+
+        const { mode, niche, language, history, auditHtmlSummary, sessionId } = parsed.data;
 
         const report = await generateReport({
             mode,

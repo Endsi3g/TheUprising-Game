@@ -74,6 +74,45 @@ export const ChatRequestSchema = z.object({
     sessionId: z.string().uuid().optional(),
 });
 
+export const ReportSectionSchema = z.object({
+    title: z.string().min(1),
+    bullets: z.array(z.string().min(1)),
+});
+
+export const ReportJsonSchema = z.object({
+    mode: SessionModeSchema,
+    language: LanguageSchema,
+    sector: z.string().min(1),
+    summary: z.string().min(1),
+    sections: z.array(ReportSectionSchema).min(1),
+    cta: z.string().optional(),
+}).passthrough();
+
+export const GenerateReportSchema = z.object({
+    mode: SessionModeSchema,
+    niche: NicheSchema,
+    language: LanguageSchema,
+    history: z.array(z.any()).default([]),
+    auditHtmlSummary: z.string().optional(),
+    sessionId: z.string().uuid().optional(),
+});
+
+export const GeneratePdfSchema = z.union([
+    ReportJsonSchema,
+    z.object({
+        report: ReportJsonSchema,
+        title: z.string().min(1).optional(),
+    }),
+]);
+
+export const ContactSchema = z.object({
+    firstName: z.string().min(2),
+    email: z.string().email(),
+    companyName: z.string().optional(),
+    projectType: z.enum(['audit', 'startup', 'portfolio', 'other']),
+    message: z.string().min(10),
+});
+
 // ─── Voice API Schemas ─────────────────────────────────────────────────────
 
 export const TranscribeAudioSchema = z.object({

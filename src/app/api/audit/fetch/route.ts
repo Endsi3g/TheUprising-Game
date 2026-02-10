@@ -4,8 +4,14 @@ import { FetchAuditSchema } from '@/lib/validators';
 import { crawlUrl, CrawlResult } from '@/lib/crawler';
 import { v4 as uuidv4 } from 'uuid';
 import { Crew, ResearchAgent, SeoSpecialistAgent, CopywriterAgent, UxAnalystAgent } from "@/lib/agents";
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    if (!checkRateLimit(ip, 'audit-fetch', { limit: 5, windowMs: 60 * 1000 })) {
+        return rateLimitResponse();
+    }
+
     try {
         const body = await request.json();
         const parsed = FetchAuditSchema.safeParse(body);

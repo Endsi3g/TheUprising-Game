@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { CreateLeadSchema } from '@/lib/validators';
-import { v4 as uuidv4 } from 'uuid';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    if (!checkRateLimit(ip, 'lead', { limit: 10, windowMs: 60 * 1000 })) {
+        return rateLimitResponse();
+    }
+
     try {
         const body = await request.json();
         const parsed = CreateLeadSchema.safeParse(body);
