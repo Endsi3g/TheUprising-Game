@@ -91,6 +91,19 @@ Variables utiles :
 - Payload : `{ report, title }` ou `report` conforme à `ReportJson`.
 - Retour : PDF téléchargeable (`application/pdf`).
 
+## Paiement Stripe (Audit Deep-Dive)
+
+- Checkout page : `/checkout/deep-dive`
+- API création session : `POST /api/checkout/create-session`
+- Webhook Stripe : `POST /api/checkout/webhook`
+- Variables requises : `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_DEEP_DIVE_PRICE_ID`
+
+## Email Follow-ups (J+1 / J+7)
+
+- Scheduling automatique après création de lead ou envoi de rapport.
+- Endpoint cron : `GET|POST /api/cron/email-followups`
+- Protection : header `x-cron-secret` avec `CRON_SECRET`.
+
 ## Recherche web
 
 - `SERPAPI_KEY` ou `SEARCH_API_KEY` active un moteur de recherche distant.

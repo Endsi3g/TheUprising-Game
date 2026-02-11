@@ -23,6 +23,7 @@ export interface GameState {
     sessionId: string | null;
     isLoading: boolean;
     error: string | null;
+    isInitialized: boolean;
 }
 
 export type GameAction =
@@ -38,6 +39,8 @@ export type GameAction =
     | { type: 'SET_ERROR'; error: string | null }
     | { type: 'SET_LOADING'; loading: boolean }
     | { type: 'SET_SESSION_ID'; sessionId: string }
+    | { type: 'HYDRATE'; state: GameState }
+    | { type: 'SET_INITIALIZED' }
     | { type: 'RESET' };
 
 // ─── Initial State ────────────────────────────────────────────────────────────
@@ -54,6 +57,7 @@ export const initialGameState: GameState = {
     sessionId: null,
     isLoading: false,
     error: null,
+    isInitialized: false,
 };
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -132,8 +136,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         case 'SET_SESSION_ID':
             return { ...state, sessionId: action.sessionId };
 
+        case 'HYDRATE':
+            return {
+                ...action.state,
+                // Ensure we don't accidentally get stuck in loading state from a stale save
+                isLoading: false,
+                error: null,
+                isInitialized: true,
+            };
+
+        case 'SET_INITIALIZED':
+            return { ...state, isInitialized: true };
+
         case 'RESET':
-            return { ...initialGameState };
+            return { ...initialGameState, isInitialized: true };
 
         default:
             return state;

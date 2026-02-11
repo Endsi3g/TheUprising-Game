@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
+import { PlausibleScript } from "@/components/analytics/PlausibleScript";
+import { CrispChat } from "@/components/support/CrispChat";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,11 +16,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "The Uprising Game — Salon AI",
-  description: "Jeu interactif piloté par IA pour salons et événements. Audit, portfolio et accompagnement entrepreneurial.",
+  title: "The Uprising Game - Salon AI",
+  description:
+    "Jeu interactif pilote par IA pour salons et evenements. Audit, portfolio et accompagnement entrepreneurial.",
 };
-
-import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
@@ -26,10 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
+        <PlausibleScript />
+        <CrispChat />
         <Toaster position="top-center" richColors />
       </body>
     </html>

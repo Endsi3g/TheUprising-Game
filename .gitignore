@@ -43,6 +43,7 @@ tsconfig.tsbuildinfo
 .gemini/
 brain/
 test_output/
+test-results/
 *.log
 
 # OS

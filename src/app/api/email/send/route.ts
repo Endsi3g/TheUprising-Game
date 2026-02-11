@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase';
 import { SendEmailSchema } from '@/lib/validators';
 import { sendReportEmail } from '@/lib/email';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { scheduleFollowupEmails } from '@/lib/email-followups';
 
 export async function POST(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
         // Fetch session report
         const { data: session, error } = await supabase
             .from('sessions')
-            .select('report_json')
+            .select('report_json, tenant_id')
             .eq('id', sessionId)
             .single();
 
@@ -52,6 +53,18 @@ export async function POST(request: NextRequest) {
             report: session.report_json,
             sessionId,
         });
+
+        try {
+            await scheduleFollowupEmails({
+                tenantId: (session as { tenant_id?: string }).tenant_id,
+                sessionId,
+                email,
+                firstName,
+                language: session.report_json.language || 'fr',
+            });
+        } catch (scheduleError) {
+            console.error('[Email/Send] Failed to schedule follow-ups:', scheduleError);
+        }
 
         return NextResponse.json({
             success: true,

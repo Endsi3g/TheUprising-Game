@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { LayoutGrid, ArrowLeft, ArrowRight, ArrowUpRight, Monitor, Smartphone, ShoppingBag } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
@@ -47,8 +48,9 @@ export default function PortfolioPage() {
     const checkScroll = () => {
         if (carouselRef.current) {
             const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
-            setCanScrollLeft(scrollLeft > 10);
-            setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+            // Add a small buffer (1px) to account for fractional pixel rendering differences
+            setCanScrollLeft(scrollLeft > 1);
+            setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
         }
     };
 
@@ -65,6 +67,8 @@ export default function PortfolioPage() {
                 left: direction === 'left' ? -scrollAmount : scrollAmount,
                 behavior: 'smooth'
             });
+            // Re-check scroll state after animation (approximate delay)
+            setTimeout(checkScroll, 500);
         }
     };
 
@@ -157,10 +161,12 @@ export default function PortfolioPage() {
                                             {/* Image container */}
                                             <div className="w-full aspect-[21/9] md:aspect-[16/8] relative overflow-hidden">
                                                 <div className={cn("absolute inset-0 bg-gradient-to-br opacity-50 z-10", project.color)} />
-                                                <img
+                                                <Image
                                                     src={project.image}
                                                     alt={project.title}
-                                                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                                                    fill
+                                                    className="object-cover transition-transform duration-1000 group-hover:scale-110"
+                                                    sizes="(max-width: 768px) 85vw, (max-width: 1200px) 600px, 800px"
                                                 />
                                                 <div className="absolute top-6 left-6 z-20">
                                                     <span className="px-4 py-2 text-[10px] font-black uppercase tracking-widest bg-white/90 dark:bg-black/90 text-black dark:text-white rounded-xl backdrop-blur-md shadow-lg border border-white/20">

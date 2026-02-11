@@ -16,9 +16,15 @@ export default function CataloguePage() {
             try {
                 const res = await fetch('/api/catalogue');
                 const data = await res.json();
-                setItems(data);
+                if (Array.isArray(data)) {
+                    setItems(data);
+                } else {
+                    console.error('Catalogue data is not an array:', data);
+                    setItems([]);
+                }
             } catch (error) {
                 console.error('Failed to fetch catalogue items', error);
+                setItems([]);
             } finally {
                 setLoading(false);
             }

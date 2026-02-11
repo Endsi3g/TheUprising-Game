@@ -14,10 +14,19 @@ export default function AuditResultsPage() {
 
     useEffect(() => {
         // If someone lands here without a report, send them back to start
-        if (!state.report && state.phase !== 'report_ready' && state.phase !== 'generating_report') {
+        if (state.isInitialized && !state.report && state.phase !== 'report_ready' && state.phase !== 'generating_report') {
             router.replace('/game/audit');
         }
-    }, [state.report, state.phase, router]);
+    }, [state.report, state.phase, state.isInitialized, router]);
+
+    if (!state.isInitialized) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+                <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-gray-500 font-medium">Chargement...</p>
+            </div>
+        );
+    }
 
     if (!state.report) {
         return (

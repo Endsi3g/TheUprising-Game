@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { CreateLeadSchema } from '@/lib/validators';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { scheduleFollowupEmails } from '@/lib/email-followups';
 
 export async function POST(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
@@ -52,6 +53,19 @@ export async function POST(request: NextRequest) {
         }
 
         const isUpdated = upserted.updated_at !== upserted.created_at;
+
+        try {
+            await scheduleFollowupEmails({
+                tenantId,
+                sessionId,
+                email,
+                firstName,
+                language: 'fr',
+            });
+        } catch (scheduleError) {
+            console.error('[Lead] Failed to schedule follow-ups:', scheduleError);
+        }
+
         return NextResponse.json({ leadId: upserted.id, updated: isUpdated });
 
 

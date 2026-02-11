@@ -270,15 +270,17 @@ export async function chat(opts: {
     history: ConversationMessage[];
     userMessage: string;
     auditHtmlSummary?: string;
+    firecrawlContent?: string;
     provider?: 'openai' | 'perplexity' | 'gemini' | 'ollama' | 'grok'; // Optional override
 }): Promise<LLMResponse> {
-    const { mode, niche, language, history, userMessage, auditHtmlSummary, provider } = opts;
+    const { mode, niche, language, history, userMessage, auditHtmlSummary, firecrawlContent, provider } = opts;
 
     const systemPrompt = buildSystemPrompt({
         mode,
         niche,
         language,
         auditHtmlSummary,
+        firecrawlContent,
     });
 
     const preferredProvider = provider || process.env.DEFAULT_LLM_PROVIDER;

@@ -24,6 +24,23 @@ export async function POST(req: Request) {
 
         const { message, history, mode, niche, language, sessionId } = parsed.data;
 
+        // Firecrawl: Detect URL and scrape
+        let firecrawlContent: string | undefined;
+        // Simple regex to find URLs in the message
+        const urlMatch = message.match(/https?:\/\/[^\s]+/);
+        if (urlMatch) {
+            const url = urlMatch[0];
+            console.log('[API] Detected URL to scrape:', url);
+            const { scrapeUrl } = await import('@/lib/firecrawl');
+            const scrapeResult = await scrapeUrl(url);
+            if (scrapeResult.success && scrapeResult.data) {
+                console.log('[API] Scrape successful');
+                firecrawlContent = scrapeResult.data.content;
+            } else {
+                console.warn('[API] Scrape failed:', scrapeResult.error);
+            }
+        }
+
         // Start chat
         const response = await chat({
             userMessage: message,
@@ -31,6 +48,7 @@ export async function POST(req: Request) {
             mode: mode as SessionMode,
             niche: niche as Niche,
             language,
+            firecrawlContent,
         });
 
         // Persist to Supabase if sessionId is provided

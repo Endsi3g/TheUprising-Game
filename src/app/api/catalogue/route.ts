@@ -54,40 +54,43 @@ export async function GET(request: Request) {
 
     const hasSupabaseEnv =
         !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
-        !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+        process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your_project.supabase.co'; // Check for placeholder
+
+    let data: CatalogueItem[] = [];
+    let usedMock = false;
 
     if (hasSupabaseEnv) {
         try {
             const supabase = createPublicClient();
+            // Use correct table name or fallback
             const table = process.env.CATALOGUE_TABLE || 'catalogue_items';
+            
             let query = supabase.from(table).select('*');
 
-            if (slug) {
-                query = query.eq('id', slug);
-            }
-            if (id) {
-                query = query.eq('id', id);
-            }
+            if (slug) query = query.eq('id', slug);
+            if (id) query = query.eq('id', id);
 
-            const { data, error } = await query;
+            const { data: supabaseData, error } = await query;
+
             if (error) {
-                console.error('[Catalogue] Supabase error:', error);
-                return NextResponse.json({ error: 'Failed to fetch catalogue' }, { status: 500 });
+                console.warn('[Catalogue] Supabase error, falling back to mock:', error.message);
+                usedMock = true;
+            } else {
+                data = supabaseData as CatalogueItem[] ?? [];
             }
-
-            return NextResponse.json(data ?? []);
         } catch (error) {
-            console.error('[Catalogue] Supabase unavailable, falling back to mock data.', error);
+            console.warn('[Catalogue] Supabase exception, falling back to mock:', error);
+            usedMock = true;
         }
+    } else {
+        usedMock = true;
     }
 
-    let data = MOCK_CATALOGUE;
-
-    if (slug) {
-        data = data.filter(item => item.id === slug);
-    }
-    if (id) {
-        data = data.filter(item => item.id === id);
+    if (usedMock || data.length === 0) {
+        data = MOCK_CATALOGUE;
+        if (slug) data = data.filter(item => item.id === slug);
+        if (id) data = data.filter(item => item.id === id);
     }
 
     return NextResponse.json(data);

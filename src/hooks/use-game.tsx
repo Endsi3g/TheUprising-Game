@@ -5,6 +5,25 @@ import { toast } from 'sonner';
 import { gameReducer, initialGameState, type GameState, type GameAction } from '@/lib/game-state';
 import type { SessionMode, Niche, Language, ReportJson } from '@/types/database';
 
+const STORAGE_KEY = 'uprising_game_state';
+
+function isValidHydrationCandidate(value: unknown): value is Partial<GameState> {
+    if (!value || typeof value !== 'object') return false;
+    const candidate = value as Partial<GameState>;
+    return typeof candidate.phase === 'string' && candidate.phase.length > 0;
+}
+
+function sanitizeHydratedState(candidate: Partial<GameState>): GameState {
+    return {
+        ...initialGameState,
+        ...candidate,
+        conversation: Array.isArray(candidate.conversation) ? candidate.conversation : [],
+        isLoading: false,
+        error: null,
+        isInitialized: true,
+    };
+}
+
 // ─── Context ──────────────────────────────────────────────────────────────────
 
 interface GameContextValue {
@@ -142,6 +161,42 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
         }
     }, [state.phase, state.sessionId, state.companyName, state.mode, state.niche, state.language, state.siteUrl, dispatch]);
 
+    // LocalStorage Persistence
+    useEffect(() => {
+        if (!state.isInitialized) return;
+
+        if (state.phase !== 'idle' && state.phase !== 'mode_select') {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } else {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+    }, [state]);
+
+    // Hydration
+    useEffect(() => {
+        try {
+            const savedState = localStorage.getItem(STORAGE_KEY);
+            if (!savedState) {
+                dispatch({ type: 'SET_INITIALIZED' });
+                return;
+            }
+
+            const parsed = JSON.parse(savedState) as unknown;
+            if (!isValidHydrationCandidate(parsed)) {
+                localStorage.removeItem(STORAGE_KEY);
+                dispatch({ type: 'SET_INITIALIZED' });
+                return;
+            }
+
+            dispatch({ type: 'HYDRATE', state: sanitizeHydratedState(parsed) });
+        } catch (e) {
+            console.error('Failed to parse saved state', e);
+            localStorage.removeItem(STORAGE_KEY);
+            dispatch({ type: 'SET_INITIALIZED' });
+        }
+    }, []);
+
+
     // Auto-trigger report generation
     useEffect(() => {
         let mounted = true;
@@ -149,6 +204,10 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
         if (state.phase === 'generating_report') {
             const generate = async () => {
                 try {
+                    // Set a timeout for report generation (e.g., 60s)
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
                     const res = await fetch('/api/game/generate-report', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -161,7 +220,10 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
                             siteUrl: state.siteUrl,
                             sessionId: state.sessionId,
                         }),
+                        signal: controller.signal
                     });
+
+                    clearTimeout(timeoutId);
 
                     if (!res.ok) throw new Error('Report generation failed');
 
@@ -172,7 +234,11 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
                 } catch (err) {
                     console.error(err);
                     if (mounted) {
-                        dispatch({ type: 'SET_ERROR', error: 'Failed to generate report' });
+                        const errMsg = err instanceof Error && err.name === 'AbortError'
+                            ? 'Le délai de génération a expiré.'
+                            : 'Failed to generate report';
+
+                        dispatch({ type: 'SET_ERROR', error: errMsg });
                         toast.error("Échec de la génération du rapport");
                     }
                 }

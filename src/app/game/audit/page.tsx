@@ -22,14 +22,15 @@ const auditNiches = [
 ];
 
 export default function AuditGamePage() {
-    const { state, selectMode, setCompanyInfo, selectNiche } = useGame();
+    const { state, selectMode, setCompanyInfo, selectNiche, reset } = useGame();
     const router = useRouter();
 
     useEffect(() => {
-        if (!state.mode) {
-            selectMode('audit');
-        }
-    }, [state.mode, selectMode]);
+        // Force reset on entry to ensure a fresh start
+        localStorage.removeItem('uprising_game_state');
+        reset();
+        selectMode('audit');
+    }, [reset, selectMode]);
 
     // Handle redirection to results page
     useEffect(() => {

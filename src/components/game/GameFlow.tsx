@@ -9,6 +9,7 @@ import Avatar from '@/components/game/Avatar';
 import { useVoiceRecorder } from '@/hooks/use-voice-recorder';
 import { useTTS } from '@/hooks/use-tts';
 import QRHandoff from '@/components/game/QRHandoff';
+import { trackEvent } from '@/lib/analytics';
 
 // ─── Niche Selection Grid ─────────────────────────────────────────────────────
 
@@ -33,7 +34,10 @@ export function NicheSelector({ niches, onSelect }: { niches: NicheOption[]; onS
                 {niches.map((niche) => (
                     <button
                         key={niche.id}
-                        onClick={() => onSelect(niche.id)}
+                        onClick={() => {
+                            trackEvent('game_niche_selected', { niche: niche.id });
+                            onSelect(niche.id);
+                        }}
                         title={`Sélectionner le secteur ${niche.label}`}
                         className="flex flex-col items-center justify-center gap-3 p-6 bg-white dark:bg-surface-dark border-2 border-gray-100 dark:border-gray-800 rounded-xl hover:border-black dark:hover:border-white transition-all duration-200 group"
                     >
@@ -56,6 +60,10 @@ export function CompanyInfoForm({ mode, showSiteUrl, onSubmit }: { mode?: string
 
     const handleSubmit = () => {
         if (name.trim()) {
+            trackEvent('game_company_info_submitted', {
+                mode: mode || 'unknown',
+                has_site_url: Boolean(url.trim()),
+            });
             onSubmit(name.trim(), url.trim() || undefined);
         }
     };
@@ -138,6 +146,29 @@ export function ConversationPanel() {
     const [isSoundEnabled, setIsSoundEnabled] = useState(false); // Default off to avoid startling
     const [showQR, setShowQR] = useState(false);
 
+    const playUiTone = (frequency: number, durationMs = 100) => {
+        if (!isSoundEnabled || typeof window === 'undefined') return;
+        try {
+            const AudioCtx = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+            if (!AudioCtx) return;
+
+            const context = new AudioCtx();
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            gain.gain.setValueAtTime(0.001, context.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.08, context.currentTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + durationMs / 1000);
+            oscillator.connect(gain);
+            gain.connect(context.destination);
+            oscillator.start();
+            oscillator.stop(context.currentTime + durationMs / 1000);
+        } catch {
+            // Ignore audio feedback failures silently.
+        }
+    };
+
     // Sync voice transcript to input
     useEffect(() => {
         if (transcript) {
@@ -163,6 +194,7 @@ export function ConversationPanel() {
 
         const lastMsg = state.conversation[state.conversation.length - 1];
         if (lastMsg && lastMsg.role === 'assistant') {
+            playUiTone(740, 90);
             stopTTS();
             speak(lastMsg.content);
         }
@@ -173,6 +205,11 @@ export function ConversationPanel() {
         stopTTS(); // Stop speaking when user sends message
         const msg = input.trim();
         setInput('');
+        playUiTone(520, 80);
+        trackEvent('game_chat_message_sent', {
+            mode: state.mode || 'unknown',
+            conversation_length: state.conversation.length,
+        });
         await sendMessage(msg);
     };
 

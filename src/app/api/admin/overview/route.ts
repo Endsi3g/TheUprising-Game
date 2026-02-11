@@ -78,12 +78,12 @@ export async function GET(request: NextRequest) {
         if (recentError) throw recentError;
 
         return NextResponse.json({
-            sessionsCount: sessionsCount || 0,
-            completedCount: completedCount || 0,
-            leadsCount: leadsCount || 0,
-            conversionRate,
-            sessionsByMode: modeBreakdown,
-            recentSessions: recentSessions || [],
+            total_sessions: sessionsCount || 0,
+            completed_sessions: completedCount || 0,
+            total_leads: leadsCount || 0,
+            conversion_rate: conversionRate,
+            sessions_by_mode: modeBreakdown,
+            recent_sessions: recentSessions || [],
         });
     } catch (err) {
         console.error('[Admin/Overview] Error:', err);

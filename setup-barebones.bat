@@ -18,12 +18,7 @@ if errorlevel 1 (
     exit /b
 )
 
-echo [3] Checking Docker...
-docker -v
-if errorlevel 0 (
-    echo Starting Docker services...
-    docker-compose up -d
-)
+echo [3] Skipped Docker auto-start. Run start-docker.bat if needed.
 
 echo [4] Starting App...
 npm run dev

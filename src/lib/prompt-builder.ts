@@ -1,9 +1,9 @@
 import type {
-    SessionMode,
-    Language,
-    Niche,
-    ConversationMessage,
-    TenantVoiceConfig,
+  SessionMode,
+  Language,
+  Niche,
+  ConversationMessage,
+  TenantVoiceConfig,
 } from '@/types/database';
 
 // ─── Embedded Context ─────────────────────────────────────────────────────────
@@ -42,16 +42,17 @@ const AUDIT_STRUCTURE_TEMPLATE = `
  * Builds the full system prompt for the LLM based on user requirements.
  */
 export function buildSystemPrompt(opts: {
-    mode: SessionMode;
-    niche: Niche;
-    language: Language;
-    auditHtmlSummary?: string;
-    voiceConfig?: TenantVoiceConfig | null;
-    includeBestPractices?: boolean;
+  mode: SessionMode;
+  niche: Niche;
+  language: Language;
+  auditHtmlSummary?: string;
+  firecrawlContent?: string;
+  voiceConfig?: TenantVoiceConfig | null;
+  includeBestPractices?: boolean;
 }): string {
-    const { mode, niche, language, auditHtmlSummary, voiceConfig } = opts;
+  const { mode, niche, language, auditHtmlSummary, firecrawlContent, voiceConfig } = opts;
 
-    const promptEN = `
+  const promptEN = `
 You are an AI assistant embedded in a web app that can browse the web in order to research businesses.
 Your main objectives are:
 1. Use browsing tools to analyze a business once the user provides its name and website URL.
@@ -66,7 +67,7 @@ Your main objectives are:
 **PHASE 1: ON NEW CONVERSATION (Discovery)**
 If this is the start of the conversation (or if you lack key info), DO NOT make small talk.
 **DO NOT** ask "How can I help you?".
-**START IMMEDIATELY** by asking 3-7 FOCUSED QUESTIONS to understand:
+**START IMMEDIATELY** by asking **ONE** FOCUSED QUESTION at a time to understand:
 - Business name and website URL (if not already provided).
 - Country/market and main offer.
 - Target audience and main goals (leads, branding, recruitment).
@@ -77,7 +78,7 @@ If this is the start of the conversation (or if you lack key info), DO NOT make 
 
 **PHASE 2: ANALYSIS (Browsing)**
 Once you have the Name and URL:
-- Use the 'browse_web' tool to visit and analyze the website.
+- Use the 'browse_web' tool (or the provided scrapped content) to analyze the website.
 - Extract key info relevant to the Audit Structure (Messaging, UX, Content, Conversion signals).
 - Combine site insights with user answers.
 
@@ -99,10 +100,11 @@ ${AUDIT_STRUCTURE_TEMPLATE}
 - Niche: ${niche}
 - Language: ${language}
 ${auditHtmlSummary ? `\n**SITE SUMMARY (Pre-crawled):**\n${auditHtmlSummary}` : ''}
+${firecrawlContent ? `\n**LIVE SITE CONTENT (Firecrawl):**\n${firecrawlContent.substring(0, 8000)}... (truncated)` : ''}
 ${voiceConfig ? `\n**VOICE/TONE:** ${voiceConfig.voice_style} (${voiceConfig.copy_tone.formality})` : ''}
 `;
 
-    const promptFR = `
+  const promptFR = `
 Tu es un assistant IA intégré dans une application web qui peut naviguer sur internet pour analyser des entreprises.
 Tes objectifs principaux sont :
 1. Utiliser les outils de navigation (browse_web) pour analyser une entreprise dès que l'utilisateur fournit son nom et l'URL.
@@ -117,7 +119,7 @@ Tes objectifs principaux sont :
 **PHASE 1 : DÉCOUVERTE (Nouvelle conversation)**
 Si c'est le début de la conversation (ou s'il manque des infos clés), NE FAIS PAS de "small talk".
 **NE DIS PAS** "Que souhaitez-vous me dire ?" ou "Comment puis-je vous aider ?".
-**COMMENCE IMMÉDIATEMENT** par poser 3 à 7 QUESTIONS CIBLÉES pour comprendre :
+**COMMENCE IMMÉDIATEMENT** par poser **UNE SEULE** QUESTION CIBLÉE à la fois pour comprendre :
 - Nom de l'entreprise et URL (si non fournis).
 - Pays/marché et offre principale.
 - Cible et objectifs (leads, notoriété, etc.).
@@ -128,7 +130,7 @@ Si c'est le début de la conversation (ou s'il manque des infos clés), NE FAIS 
 
 **PHASE 2 : ANALYSE (Navigation)**
 Une fois que tu as le Nom et l'URL :
-- Utilise l'outil 'browse_web' pour visiter le site.
+- Utilise l'outil 'browse_web' (ou le contenu scrappé fourni) pour analyser le site.
 - Extrait les infos clés pour l'Audit (Message, UX, Contenu, Conversion).
 - Combine les infos du site avec les réponses.
 
@@ -150,12 +152,13 @@ ${AUDIT_STRUCTURE_TEMPLATE}
 - Niche : ${niche}
 - Langue : ${language}
 ${auditHtmlSummary ? `\n**RÉSUMÉ DU SITE (Pré-analysé) :**\n${auditHtmlSummary}` : ''}
+${firecrawlContent ? `\n**CONTENU DU SITE (Firecrawl) :**\n${firecrawlContent.substring(0, 8000)}... (tronqué)` : ''}
 ${voiceConfig ? `\n**VOIX/TON :** ${voiceConfig.voice_style} (${voiceConfig.copy_tone.formality})` : ''}
 `;
 
-    // Return the appropriate prompt based on session language, but instruct to be bilingual.
-    // The prompt text itself is in the requested language, guiding the AI to behave in that language primarily.
-    return language === 'fr' ? promptFR : promptEN;
+  // Return the appropriate prompt based on session language, but instruct to be bilingual.
+  // The prompt text itself is in the requested language, guiding the AI to behave in that language primarily.
+  return language === 'fr' ? promptFR : promptEN;
 }
 
 /**
@@ -163,21 +166,92 @@ ${voiceConfig ? `\n**VOIX/TON :** ${voiceConfig.voice_style} (${voiceConfig.copy
  * Reuses the audit structure for consistency.
  */
 export function buildReportPrompt(opts: {
-    mode: SessionMode;
-    niche: Niche;
-    language: Language;
-    conversation: ConversationMessage[];
-    auditHtmlSummary?: string;
+  mode: SessionMode;
+  niche: Niche;
+  language: Language;
+  conversation: ConversationMessage[];
+  auditHtmlSummary?: string;
 }): string {
-    const { mode, niche, language, conversation, auditHtmlSummary } = opts;
+  const { mode, niche, language, conversation, auditHtmlSummary } = opts;
 
-    const conversationText = conversation
-        .map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
-        .join('\n');
+  const conversationText = conversation
+    .map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
+    .join('\n');
 
-    const lang = language === 'fr' ? 'français' : 'English';
+  const lang = language === 'fr' ? 'français' : 'English';
 
-    return `${language === 'fr' ? 'Génère' : 'Generate'} a structured report in ${lang} based on the following conversation.
+  // Different structure for Startup mode
+  if (mode === 'startup') {
+    const STARTUP_STRUCTURE = `
+1. EXECUTIVE SUMMARY:
+   - Project Viability Score 🚀
+   - Elevator Pitch (Refined)
+   - Core Value Proposition
+
+2. ROADMAP PHASE 1: MVP (Months 1-3):
+   - Focus: Validation & Core Features
+   - Key Actions to take
+   - "Do things that don't scale"
+
+3. ROADMAP PHASE 2: TRACTION (Months 4-9):
+   - Focus: Growth & User Retention
+   - Marketing Channels to activate
+
+4. ROADMAP PHASE 3: SCALE (Months 9+):
+   - Focus: Automation & Team
+   - Long-term vision
+
+5. IMMEDIATE NEXT STEPS:
+   - 3 things to do this week.
+`;
+
+    return `${language === 'fr' ? 'Génère' : 'Generate'} a startup launch plan in ${lang} based on the conversation.
+Use the Startup Structure below.
+
+**STARTUP STRUCTURE:**
+${STARTUP_STRUCTURE}
+
+**CONTEXT:**
+Mode: startup
+Niche: ${niche}
+Language: ${language}
+
+**CONVERSATION:**
+${conversationText}
+
+**RESPONSE FORMAT:**
+Respond ONLY with valid JSON:
+{
+  "mode": "startup",
+  "language": "${language}",
+  "sector": "[sector name]",
+  "summary": "[Executive Summary]",
+  "sections": [
+    {
+      "title": "Phase 1: MVP (Minimum Viable Product)",
+      "bullets": ["[Action 1]", "[Action 2]", "[Action 3]"]
+    },
+    {
+      "title": "Phase 2: Traction & Growth",
+      "bullets": ["[Action 1]", "[Action 2]", "[Action 3]"]
+    },
+    {
+      "title": "Phase 3: Scale & Automation",
+      "bullets": ["[Action 1]", "[Action 2]", "[Action 3]"]
+    },
+    {
+      "title": "Immediate Next Steps",
+      "bullets": ["[Step 1]", "[Step 2]", "[Step 3]"]
+    }
+  ],
+  "cta": "${language === 'fr' ? "Lancer le développement de votre MVP avec Uprising." : "Start building your MVP with Uprising."}",
+  "best_practices_used": ["Lean Startup", "Agile Development"]
+}
+`;
+  }
+
+  // Default Audit Prompt
+  return `${language === 'fr' ? 'Génère' : 'Generate'} a structured report in ${lang} based on the following conversation.
 Use the Audit Structure defined below as a guide for the 'sections' and 'summary'.
 
 **AUDIT STRUCTURE:**
@@ -216,10 +290,10 @@ Respond ONLY with valid JSON in the following format:
  * Formats conversation history for the LLM context.
  */
 export function formatConversationHistory(
-    messages: ConversationMessage[]
+  messages: ConversationMessage[]
 ): Array<{ role: 'user' | 'model'; parts: [{ text: string }] }> {
-    return messages.map((m) => ({
-        role: m.role === 'user' ? 'user' : 'model',
-        parts: [{ text: m.content }],
-    }));
+  return messages.map((m) => ({
+    role: m.role === 'user' ? 'user' : 'model',
+    parts: [{ text: m.content }],
+  }));
 }

@@ -113,6 +113,14 @@ export const ContactSchema = z.object({
     message: z.string().min(10),
 });
 
+export const CreateCheckoutSessionSchema = z.object({
+    sessionId: z.string().uuid().optional(),
+    email: z.string().email().optional(),
+    firstName: z.string().min(1).max(200).optional(),
+    mode: SessionModeSchema.optional().default('audit'),
+    language: LanguageSchema.optional().default('fr'),
+});
+
 // ─── Voice API Schemas ─────────────────────────────────────────────────────
 
 export const TranscribeAudioSchema = z.object({
@@ -148,3 +156,4 @@ export type TtsInput = z.infer<typeof TtsSchema>;
 export type GenerateReportInput = z.infer<typeof GenerateReportSchema>;
 export type GeneratePdfInput = z.infer<typeof GeneratePdfSchema>;
 export type ContactInput = z.infer<typeof ContactSchema>;
+export type CreateCheckoutSessionInput = z.infer<typeof CreateCheckoutSessionSchema>;

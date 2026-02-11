@@ -13,10 +13,19 @@ export default function StartupResultsPage() {
     const router = useRouter();
 
     useEffect(() => {
-        if (!state.report && state.phase !== 'report_ready' && state.phase !== 'generating_report') {
+        if (state.isInitialized && !state.report && state.phase !== 'report_ready' && state.phase !== 'generating_report') {
             router.replace('/game/startup');
         }
-    }, [state.report, state.phase, router]);
+    }, [state.report, state.phase, state.isInitialized, router]);
+
+    if (!state.isInitialized) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+                <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-gray-500 font-medium">Chargement...</p>
+            </div>
+        );
+    }
 
     if (!state.report) {
         return (
@@ -36,6 +45,12 @@ export default function StartupResultsPage() {
                         Nouveau projet
                     </Link>
                     <div className="flex gap-3">
+                        <Link
+                            href="/game/startup/plan"
+                            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                        >
+                            Voir la Roadmap
+                        </Link>
                         <Link
                             href="/contact"
                             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition-all"

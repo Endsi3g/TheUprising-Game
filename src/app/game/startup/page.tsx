@@ -21,15 +21,15 @@ const startupNiches = [
 ];
 
 export default function StartupGamePage() {
-    const { state, selectMode, setCompanyInfo, selectNiche } = useGame();
+    const { state, selectMode, setCompanyInfo, selectNiche, reset } = useGame();
     const router = useRouter();
 
-    // Auto-select startup mode if not already set
+    // Force reset on entry to ensure a fresh start
     useEffect(() => {
-        if (!state.mode) {
-            selectMode('startup');
-        }
-    }, [state.mode, selectMode]);
+        localStorage.removeItem('uprising_game_state');
+        reset();
+        selectMode('startup');
+    }, [reset, selectMode]);
 
     // Handle redirection to results page
     useEffect(() => {
