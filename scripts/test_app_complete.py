@@ -31,10 +31,7 @@ import sys
 import io
 import time
 import uuid
-import struct
 import wave
-import math
-import subprocess
 from pathlib import Path
 
 # Force UTF-8 stdout on Windows
