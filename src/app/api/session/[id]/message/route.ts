@@ -3,15 +3,15 @@ import { createServiceClient } from '@/lib/supabase';
 import { SendMessageSchema } from '@/lib/validators';
 import { chat } from '@/lib/llm';
 import type { ConversationMessage, Language } from '@/types/database';
-import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { checkRateLimit, getClientIp, RATE_LIMITS, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-    if (!checkRateLimit(ip, 'session-message', { limit: 30, windowMs: 60 * 1000 })) {
-        return rateLimitResponse();
+    const ip = getClientIp(request);
+    if (!checkRateLimit(ip, 'session-message', RATE_LIMITS.sessionMessage)) {
+        return rateLimitResponse(60);
     }
 
     try {
@@ -21,6 +21,7 @@ export async function POST(
         // Extract optional voice fields before Zod validation
         const voiceTranscript = body.voiceTranscript as string | undefined;
         const languageOverride = body.languageOverride as Language | undefined;
+        const imageDataUrl = body.imageDataUrl as string | undefined;
 
         const parsed = SendMessageSchema.safeParse(body);
 
@@ -97,6 +98,7 @@ export async function POST(
             history,
             userMessage,
             auditHtmlSummary,
+            imageDataUrl,
         });
 
         // Update conversation history

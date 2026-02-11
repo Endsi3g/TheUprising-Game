@@ -1,30 +1,15 @@
 @echo off
-title The Uprising Game - Setup
-echo Starting setup...
+title The Uprising Game — Barebones
+echo [FAST BOOT] Starting...
 
-echo [1] Checking Node.js...
-node -v
-if errorlevel 1 (
-    echo Node.js not found. Please install from nodejs.org
-    pause
-    exit /b
-)
+:: Fast install (only if needed generally, but here we force for consistency)
+echo [1/3] Syncing dependencies...
+call npm install --prefer-offline --no-audit --no-fund --silent
 
-echo [2] Installing dependencies...
-call npm install
-if errorlevel 1 (
-    echo Install failed.
-    pause
-    exit /b
-)
+:: Start Docker (modern command)
+echo [2/3] Checking Docker...
+docker compose up -d >nul 2>&1
 
-echo [3] Checking Docker...
-docker -v
-if errorlevel 0 (
-    echo Starting Docker services...
-    docker-compose up -d
-)
-
-echo [4] Starting App...
-npm run dev
-pause
+:: Run
+echo [3/3] Launching Next.js...
+call npm run dev

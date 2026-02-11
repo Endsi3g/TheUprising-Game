@@ -4,18 +4,18 @@ Ce document répertorie les priorités stratégiques et techniques pour faire pa
 
 ## 🚀 PRIORITÉS HAUTE (Sprint Suivant)
 
-### 1. Page de Roadmap "Startup"
+### 1. Page de Roadmap "Startup" ✅ [COMPLETED]
 
 - **Objectif** : Créer la page `/game/startup/plan` (actuellement manquante).
 - **Contenu** : Résumé du projet, Roadmap phasée (MVP, V1, V2), ressources nécessaires et timeline estimée.
 - **Valeur** : Ferme la boucle de l'expérience utilisateur pour le mode "Startup".
 
-### 2. Automatisation des Emails (Lead Nurturing)
+### 2. Automatisation des Emails (Lead Nurturing) ✅ [COMPLETED]
 
 - **Outil suggéré** : Resend ou SendGrid.
 - **Workflow** : Envoi automatique du rapport d'audit par email + série d'emails de suivi (J+1, J+7) avec des suggestions stratégiques.
 
-### 3. Persistance des Formulaires
+### 3. Persistance des Formulaires ✅ [COMPLETED]
 
 - **Objectif** : Utiliser le `localStorage` pour sauvegarder les réponses aux formulaires en cours de saisie.
 - **Valeur** : Évite la perte de données si l'utilisateur rafraîchit la page accidentellement.

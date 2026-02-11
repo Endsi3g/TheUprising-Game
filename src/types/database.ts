@@ -131,6 +131,7 @@ export interface ReportJson {
     gamification?: GamificationScore;
     upsells?: UpsellPack[];
     best_practices_used?: string[];
+    roadmap?: { phase: string; duration: string; steps: string[] }[];
 }
 
 export interface Session {
@@ -152,13 +153,14 @@ export interface Session {
 export interface Lead {
     id: string;
     tenant_id: string;
-    session_id: string;
+    session_id: string | null;
     first_name: string;
     email: string;
     sector: string;
     site_url: string | null;
     notes: string | null;
     created_at: string;
+    updated_at: string;
 }
 
 // ─── Audit Run ────────────────────────────────────────────────────────────────
@@ -191,6 +193,9 @@ export interface LanguageDetectionState {
 // ─── Event Logging ────────────────────────────────────────────────────────────
 
 export type EventType =
+    | 'visit.home'
+    | 'audit.started'
+    | 'audit.completed'
     | 'session.start'
     | 'session.complete'
     | 'session.abandon'

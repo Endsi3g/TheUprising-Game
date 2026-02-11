@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { requireAdmin } from '@/lib/auth-guard';
+import { FUNNEL_EVENTS } from '@/lib/analytics/events';
+
+const toRate = (numerator: number, denominator: number) => {
+    if (!denominator || denominator <= 0) return 0;
+    return Math.round((numerator / denominator) * 100);
+};
 
 export async function GET(request: NextRequest) {
     try {
@@ -21,7 +27,7 @@ export async function GET(request: NextRequest) {
         const supabase = createServiceClient();
 
         // Total sessions
-        const { count: sessionsCount, error: dbError } = await supabase
+        const { count: totalSessions, error: dbError } = await supabase
             .from('sessions')
             .select('*', { count: 'exact', head: true })
             .eq('tenant_id', tenantId);
@@ -29,7 +35,7 @@ export async function GET(request: NextRequest) {
         if (dbError) throw dbError;
 
         // Completed sessions
-        const { count: completedCount, error: compError } = await supabase
+        const { count: completedSessions, error: compError } = await supabase
             .from('sessions')
             .select('*', { count: 'exact', head: true })
             .eq('tenant_id', tenantId)
@@ -54,7 +60,7 @@ export async function GET(request: NextRequest) {
         );
 
         // Total leads
-        const { count: leadsCount, error: leadsError } = await supabase
+        const { count: totalLeads, error: leadsError } = await supabase
             .from('leads')
             .select('*', { count: 'exact', head: true })
             .eq('tenant_id', tenantId);
@@ -62,10 +68,7 @@ export async function GET(request: NextRequest) {
         if (leadsError) throw leadsError;
 
         // Conversion rate
-        const conversionRate =
-            sessionsCount && sessionsCount > 0
-                ? Math.round(((leadsCount || 0) / sessionsCount) * 100)
-                : 0;
+        const conversionRate = toRate(totalLeads || 0, totalSessions || 0);
 
         // Recent sessions (last 10)
         const { data: recentSessions, error: recentError } = await supabase
@@ -77,13 +80,74 @@ export async function GET(request: NextRequest) {
 
         if (recentError) throw recentError;
 
+        // Funnel step 1: Home visits tracked in event_logs
+        const { count: visitCount, error: visitError } = await supabase
+            .from('event_logs')
+            .select('*', { count: 'exact', head: true })
+            .eq('tenant_id', tenantId)
+            .eq('event_type', FUNNEL_EVENTS.VISIT_HOME);
+
+        if (visitError) throw visitError;
+
+        // Funnel step 2: audit sessions started
+        const { data: auditSessionRows, count: auditStartedCount, error: auditStartError } = await supabase
+            .from('sessions')
+            .select('id', { count: 'exact' })
+            .eq('tenant_id', tenantId)
+            .eq('mode', 'audit');
+
+        if (auditStartError) throw auditStartError;
+
+        // Funnel step 3: audit sessions completed
+        const { count: auditCompletedCount, error: auditCompletedError } = await supabase
+            .from('sessions')
+            .select('*', { count: 'exact', head: true })
+            .eq('tenant_id', tenantId)
+            .eq('mode', 'audit')
+            .not('completed_at', 'is', null);
+
+        if (auditCompletedError) throw auditCompletedError;
+
+        // Funnel step 4: leads linked to audit sessions
+        let auditLeadCount = 0;
+        const auditSessionIds = (auditSessionRows || []).map((row) => row.id);
+        if (auditSessionIds.length > 0) {
+            const { count: countedAuditLeads, error: auditLeadError } = await supabase
+                .from('leads')
+                .select('*', { count: 'exact', head: true })
+                .eq('tenant_id', tenantId)
+                .in('session_id', auditSessionIds);
+
+            if (auditLeadError) throw auditLeadError;
+            auditLeadCount = countedAuditLeads || 0;
+        }
+
+        const visits = visitCount || 0;
+        const auditsStarted = auditStartedCount || 0;
+        const auditsCompleted = auditCompletedCount || 0;
+        const leadsCreated = auditLeadCount;
+
         return NextResponse.json({
-            sessionsCount: sessionsCount || 0,
-            completedCount: completedCount || 0,
-            leadsCount: leadsCount || 0,
-            conversionRate,
-            sessionsByMode: modeBreakdown,
-            recentSessions: recentSessions || [],
+            total_sessions: totalSessions || 0,
+            completed_sessions: completedSessions || 0,
+            total_leads: totalLeads || 0,
+            conversion_rate: conversionRate,
+            sessions_by_mode: modeBreakdown,
+            recent_sessions: recentSessions || [],
+            funnel: {
+                visits,
+                audits_started: auditsStarted,
+                audits_completed: auditsCompleted,
+                leads_created: leadsCreated,
+                visit_to_start_rate: toRate(auditsStarted, visits),
+                start_to_complete_rate: toRate(auditsCompleted, auditsStarted),
+                complete_to_lead_rate: toRate(leadsCreated, auditsCompleted),
+                full_funnel_rate: toRate(leadsCreated, visits),
+            },
+            analytics: {
+                ga4_enabled: Boolean(process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID),
+                plausible_enabled: Boolean(process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN),
+            },
         });
     } catch (err) {
         console.error('[Admin/Overview] Error:', err);

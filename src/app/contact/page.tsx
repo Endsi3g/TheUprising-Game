@@ -1,41 +1,63 @@
+```javascript
 'use client';
 
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Mail, MessageSquare, Send, CheckCircle2, ArrowRight, Building2, User, Sparkles, Calendar, Clock } from 'lucide-react';
+import { Mail, MessageSquare, Send, CheckCircle2, ArrowRight, Building2, User, Sparkles, Calendar, Clock, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { trackAnalyticsEvent, trackServerEvent } from '@/lib/analytics-client';
+import { CLIENT_ANALYTICS_EVENTS, FUNNEL_EVENTS } from '@/lib/analytics/events';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { ContactSchema, type ContactInput } from '@/lib/validators';
+import { cn } from '@/lib/utils'; // Assuming cn utility exists
 
 export default function ContactPage() {
-    const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-    const [formData, setFormData] = useState({
-        firstName: '',
-        email: '',
-        companyName: '',
-        projectType: 'audit',
-        message: '',
+    
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        watch,
+        formState: { errors, isSubmitting } // isSubmitting handles loading state automatically
+    } = useForm<ContactInput>({
+        resolver: zodResolver(ContactSchema),
+        defaultValues: {
+            projectType: 'audit',
+            firstName: '',
+            email: '',
+            companyName: '',
+            message: ''
+        }
     });
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
+    const projectType = watch('projectType');
+    const firstName = watch('firstName'); // Watch firstName for the submitted state
 
+    const onSubmit = async (data: ContactInput) => {
         try {
             const res = await fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(data),
             });
 
             if (!res.ok) throw new Error('Failed to send message');
 
             setSubmitted(true);
+            trackAnalyticsEvent(CLIENT_ANALYTICS_EVENTS.LEAD_CREATED, { source: 'contact_form', project_type: data.projectType });
+            trackServerEvent(FUNNEL_EVENTS.LEAD_CREATED, {
+                metadata: {
+                    source: 'contact_form',
+                    project_type: data.projectType,
+                },
+            });
             toast.success('Demande envoyée avec succès !');
-        } catch (err) {
+        } catch {
             toast.error('Une erreur est survenue lors de l\'envoi.');
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -51,9 +73,9 @@ export default function ContactPage() {
                         <CheckCircle2 className="w-12 h-12 text-green-600 dark:text-green-400" />
                     </div>
                     <div className="space-y-4">
-                        <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">C&apos;est en route, {formData.firstName} !</h1>
+                        <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">C&apos;est en route, {firstName} !</h1>
                         <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed">
-                            Nous avons bien reçu votre demande pour un projet de <span className="text-black dark:text-white font-bold capitalize">{formData.projectType}</span>.
+                            Nous avons bien reçu votre demande pour un projet de <span className="text-black dark:text-white font-bold capitalize">{projectType}</span>.
                             Notre équipe analyse votre profil et reviendra vers vous sous 24h.
                         </p>
                     </div>
@@ -84,14 +106,16 @@ export default function ContactPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background-light dark:bg-background-dark py-12 md:py-24 relative overflow-hidden">
+        <div className="min-h-screen bg-background-light dark:bg-background-dark relative overflow-hidden">
+            <PageHeader />
+            
             {/* Ambient Background Elements */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none opacity-20 dark:opacity-10">
                 <div className="absolute top-1/4 right-0 w-96 h-96 bg-blue-500 rounded-full blur-[160px]" />
                 <div className="absolute bottom-1/4 left-0 w-96 h-96 bg-purple-500 rounded-full blur-[160px]" />
             </div>
 
-            <div className="max-w-7xl mx-auto px-8 relative">
+            <div className="max-w-7xl mx-auto px-8 py-12 md:py-24 relative">
                 <div className="grid lg:grid-cols-[1fr,1.2fr] gap-20 items-center">
 
                     {/* Content Column */}
@@ -159,33 +183,45 @@ export default function ContactPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         className="bg-white dark:bg-surface-dark p-10 md:p-14 rounded-[3rem] shadow-2xl border border-gray-100 dark:border-gray-800 relative z-10"
                     >
-                        <form onSubmit={handleSubmit} className="space-y-8">
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-3">
                                     <label className="text-xs font-black uppercase tracking-widest opacity-50 flex items-center gap-2">
                                         <User className="w-3 h-3" /> Votre Prénom
                                     </label>
                                     <input
-                                        required
+                                        {...register('firstName')}
                                         type="text"
                                         placeholder="Jean"
-                                        className="w-full px-6 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent focus:border-black dark:focus:border-white focus:bg-white dark:focus:bg-gray-900 transition-all outline-none font-medium"
-                                        value={formData.firstName}
-                                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                        className={cn(
+                                            "w-full px-6 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent focus:bg-white dark:focus:bg-gray-900 transition-all outline-none font-medium",
+                                            errors.firstName ? "border-red-500 focus:border-red-500" : "focus:border-black dark:focus:border-white"
+                                        )}
                                     />
+                                    {errors.firstName && (
+                                        <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                            <AlertCircle className="w-3 h-3"/> {errors.firstName.message}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="space-y-3">
                                     <label className="text-xs font-black uppercase tracking-widest opacity-50 flex items-center gap-2">
                                         <Mail className="w-3 h-3" /> Votre Email
                                     </label>
                                     <input
-                                        required
+                                        {...register('email')}
                                         type="email"
                                         placeholder="jean@uprising.studio"
-                                        className="w-full px-6 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent focus:border-black dark:focus:border-white focus:bg-white dark:focus:bg-gray-900 transition-all outline-none font-medium"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        className={cn(
+                                            "w-full px-6 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent focus:bg-white dark:focus:bg-gray-900 transition-all outline-none font-medium",
+                                            errors.email ? "border-red-500 focus:border-red-500" : "focus:border-black dark:focus:border-white"
+                                        )}
                                     />
+                                    {errors.email && (
+                                        <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                            <AlertCircle className="w-3 h-3"/> {errors.email.message}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
@@ -194,11 +230,10 @@ export default function ContactPage() {
                                     <Building2 className="w-3 h-3" /> Entreprise (Optionnel)
                                 </label>
                                 <input
+                                    {...register('companyName')}
                                     type="text"
                                     placeholder="The Uprising Inc."
                                     className="w-full px-6 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent focus:border-black dark:focus:border-white focus:bg-white dark:focus:bg-gray-900 transition-all outline-none font-medium"
-                                    value={formData.companyName}
-                                    onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                                 />
                             </div>
 
@@ -209,11 +244,13 @@ export default function ContactPage() {
                                         <button
                                             key={type}
                                             type="button"
-                                            onClick={() => setFormData({ ...formData, projectType: type })}
-                                            className={`px-4 py-3 rounded-2xl capitalize border-2 transition-all text-xs font-bold ${formData.projectType === type
-                                                ? 'bg-black text-white border-black dark:bg-white dark:text-black dark:border-white shadow-lg scale-[1.05]'
-                                                : 'bg-transparent border-gray-100 dark:border-gray-800 text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
-                                                }`}
+                                            onClick={() => setValue('projectType', type as any)}
+                                            className={cn(
+                                                "px-4 py-3 rounded-2xl capitalize border-2 transition-all text-xs font-bold",
+                                                projectType === type
+                                                    ? 'bg-black text-white border-black dark:bg-white dark:text-black dark:border-white shadow-lg scale-[1.05]'
+                                                    : 'bg-transparent border-gray-100 dark:border-gray-800 text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                                            )}
                                         >
                                             {type === 'other' ? 'Autre' : type}
                                         </button>
@@ -222,23 +259,31 @@ export default function ContactPage() {
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-xs font-black uppercase tracking-widest opacity-50">Parlez-nous de votre vision</label>
+                                <label className="text-xs font-black uppercase tracking-widest opacity-50 flex items-center gap-2">
+                                    Parlez-nous de votre vision
+                                </label>
                                 <textarea
-                                    required
+                                    {...register('message')}
                                     rows={4}
                                     placeholder="Quels sont vos objectifs ?"
-                                    className="w-full px-6 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent focus:border-black dark:focus:border-white focus:bg-white dark:focus:bg-gray-900 transition-all outline-none resize-none font-medium"
-                                    value={formData.message}
-                                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                    className={cn(
+                                        "w-full px-6 py-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border-2 border-transparent focus:bg-white dark:focus:bg-gray-900 transition-all outline-none resize-none font-medium",
+                                        errors.message ? "border-red-500 focus:border-red-500" : "focus:border-black dark:focus:border-white"
+                                    )}
                                 />
+                                {errors.message && (
+                                    <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                        <AlertCircle className="w-3 h-3"/> {errors.message.message}
+                                    </p>
+                                )}
                             </div>
 
                             <button
-                                disabled={loading}
+                                disabled={isSubmitting}
                                 type="submit"
                                 className="w-full py-5 bg-black dark:bg-white dark:text-black text-white rounded-[1.5rem] font-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50"
                             >
-                                {loading ? (
+                                {isSubmitting ? (
                                     <div className="w-6 h-6 border-4 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
                                 ) : (
                                     <>
@@ -254,3 +299,4 @@ export default function ContactPage() {
         </div>
     );
 }
+```

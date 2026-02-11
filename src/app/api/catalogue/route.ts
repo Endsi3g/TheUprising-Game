@@ -72,10 +72,14 @@ export async function GET(request: Request) {
             const { data, error } = await query;
             if (error) {
                 console.error('[Catalogue] Supabase error:', error);
-                return NextResponse.json({ error: 'Failed to fetch catalogue' }, { status: 500 });
+                throw error; // Let the catch block handle it
             }
 
-            return NextResponse.json(data ?? []);
+            if (data && data.length > 0) {
+                return NextResponse.json(data);
+            }
+
+            console.log('[Catalogue] No data in Supabase, falling back to mock.');
         } catch (error) {
             console.error('[Catalogue] Supabase unavailable, falling back to mock data.', error);
         }

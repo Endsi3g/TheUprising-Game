@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { generateReport } from '@/lib/llm';
-import { computeGamification, detectProblems } from '@/lib/gamification';
+import { computeGamification } from '@/lib/gamification';
 import { getMatchingUpsells } from '@/lib/b2b-report';
 import { logSessionComplete, logReportGenerated, logBadgeUnlocked } from '@/lib/logger';
+import { checkRateLimit, getClientIp, RATE_LIMITS, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    const ip = getClientIp(request);
+    if (!checkRateLimit(ip, 'session-complete', RATE_LIMITS.sessionComplete)) {
+        return rateLimitResponse(60);
+    }
+
     try {
         const { id: sessionId } = await params;
         const supabase = createServiceClient();

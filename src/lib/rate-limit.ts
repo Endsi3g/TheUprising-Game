@@ -1,9 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-interface RateLimitConfig {
+export interface RateLimitConfig {
     limit: number; // Max requests
     windowMs: number; // Time window in ms
 }
+
+export const RATE_LIMITS = {
+    analyticsEvent: { limit: 120, windowMs: 60 * 1000 },
+    chat: { limit: 20, windowMs: 60 * 1000 },
+    contact: { limit: 5, windowMs: 60 * 1000 },
+    emailSend: { limit: 5, windowMs: 60 * 1000 },
+    gameSessionStart: { limit: 20, windowMs: 60 * 1000 },
+    generatePdf: { limit: 8, windowMs: 60 * 1000 },
+    generateReport: { limit: 3, windowMs: 60 * 1000 },
+    lead: { limit: 10, windowMs: 60 * 1000 },
+    sessionComplete: { limit: 3, windowMs: 60 * 1000 },
+    sessionMessage: { limit: 30, windowMs: 60 * 1000 },
+    sessionStart: { limit: 10, windowMs: 60 * 1000 },
+    tts: { limit: 10, windowMs: 60 * 1000 },
+    transcribe: { limit: 5, windowMs: 60 * 1000 },
+} as const;
 
 const limiters = new Map<string, Map<string, number[]>>();
 
@@ -47,9 +63,40 @@ export function checkRateLimit(ip: string, endpoint: string, config: RateLimitCo
     return true;
 }
 
-export function rateLimitResponse() {
+function fingerprint(value: string): string {
+    let hash = 5381;
+    for (let i = 0; i < value.length; i += 1) {
+        hash = (hash * 33) ^ value.charCodeAt(i);
+    }
+    return (hash >>> 0).toString(16);
+}
+
+export function getClientIp(req: Request | NextRequest): string {
+    const forwarded = req.headers.get('x-forwarded-for');
+    if (forwarded) {
+        const first = forwarded.split(',')[0]?.trim();
+        if (first) return first;
+    }
+
+    const realIp = req.headers.get('x-real-ip')?.trim();
+    if (realIp) return realIp;
+
+    const cfIp = req.headers.get('cf-connecting-ip')?.trim();
+    if (cfIp) return cfIp;
+
+    const userAgent = req.headers.get('user-agent') || 'unknown';
+    return `unknown:${fingerprint(userAgent)}`;
+}
+
+export function rateLimitResponse(retryAfterSeconds = 60) {
     return NextResponse.json(
         { error: 'Too many requests, please try again later.' },
-        { status: 429 }
+        {
+            status: 429,
+            headers: {
+                'Retry-After': String(retryAfterSeconds),
+                'Cache-Control': 'no-store',
+            },
+        }
     );
 }

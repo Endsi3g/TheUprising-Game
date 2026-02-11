@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { CreateLeadSchema } from '@/lib/validators';
-import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { checkRateLimit, getClientIp, RATE_LIMITS, rateLimitResponse } from '@/lib/rate-limit';
+import { logLeadCreated } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-    if (!checkRateLimit(ip, 'lead', { limit: 10, windowMs: 60 * 1000 })) {
-        return rateLimitResponse();
+    const ip = getClientIp(request);
+    if (!checkRateLimit(ip, 'lead', RATE_LIMITS.lead)) {
+        return rateLimitResponse(60);
     }
 
     try {
@@ -25,22 +26,40 @@ export async function POST(request: NextRequest) {
 
         const supabase = createServiceClient();
 
-        // Atomic Upsert (Insert or Update if conflict on session_id + email)
+        // Check existing lead to report insert/update status reliably.
+        const { data: existingLead, error: existingError } = await supabase
+            .from('leads')
+            .select('id')
+            .eq('session_id', sessionId)
+            .eq('email', email)
+            .maybeSingle();
+
+        if (existingError) {
+            console.error('[Lead] Existing lookup error:', existingError);
+            return NextResponse.json(
+                { error: 'Failed to lookup lead' },
+                { status: 500 }
+            );
+        }
+
+        const payload = {
+            session_id: sessionId,
+            tenant_id: tenantId,
+            email,
+            first_name: firstName,
+            sector,
+            site_url: siteUrl || null,
+            notes: notes || null,
+            ...(existingLead ? { updated_at: new Date().toISOString() } : {}),
+        };
+
+        // Atomic upsert guarded by DB unique index (session_id, email).
         const { data: upserted, error: upsertError } = await supabase
             .from('leads')
-            .upsert({
-                session_id: sessionId,
-                tenant_id: tenantId,
-                email,
-                first_name: firstName,
-                sector,
-                site_url: siteUrl || null,
-                notes: notes || null,
-                updated_at: new Date().toISOString(),
-            }, {
+            .upsert(payload, {
                 onConflict: 'session_id, email',
             })
-            .select()
+            .select('id, created_at, updated_at')
             .single();
 
         if (upsertError) {
@@ -51,7 +70,12 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const isUpdated = upserted.updated_at !== upserted.created_at;
+        const isUpdated =
+            Boolean(existingLead) ||
+            (Boolean(upserted.updated_at) && upserted.updated_at !== upserted.created_at);
+        if (!isUpdated) {
+            void logLeadCreated(tenantId, sessionId, email);
+        }
         return NextResponse.json({ leadId: upserted.id, updated: isUpdated });
 
 

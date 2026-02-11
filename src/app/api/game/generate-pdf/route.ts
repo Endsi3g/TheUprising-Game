@@ -2,17 +2,12 @@ import { NextResponse } from 'next/server';
 import PDFDocument from 'pdfkit';
 import type { ReportJson } from '@/types/database';
 import { GeneratePdfSchema } from '@/lib/validators';
-import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
-
-type PdfPayload = {
-    report?: ReportJson;
-    title?: string;
-};
+import { checkRateLimit, getClientIp, RATE_LIMITS, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-    if (!checkRateLimit(ip, 'generate-pdf', { limit: 10, windowMs: 60 * 1000 })) {
-        return rateLimitResponse();
+    const ip = getClientIp(req);
+    if (!checkRateLimit(ip, 'generate-pdf', RATE_LIMITS.generatePdf)) {
+        return rateLimitResponse(60);
     }
 
     try {
@@ -26,7 +21,7 @@ export async function POST(req: Request) {
         }
 
         const value = parsed.data;
-        const report = 'report' in value ? value.report : value;
+        const report = ('report' in value ? value.report : value) as ReportJson;
         const title = 'report' in value ? value.title : undefined;
 
         // Create a PDF document
@@ -46,7 +41,7 @@ export async function POST(req: Request) {
             doc.fillColor('#111827')
                 .fontSize(24)
                 .font('Helvetica-Bold')
-                .text(title || "RAPPORT D'ANALYSE - THE UPRISING", { align: 'center' });
+                .text((title || "RAPPORT D'ANALYSE - THE UPRISING") as string, { align: 'center' });
 
             doc.moveDown(0.5);
             doc.fontSize(12)

@@ -12,3 +12,11 @@ if (!isValidUUID(TENANT_ID)) {
 }
 
 export const APP_NAME = 'Salon AI';
+
+export const FRAMER_HOME_HERO_URL = process.env.NEXT_PUBLIC_FRAMER_HOME_HERO_URL || '';
+export const FRAMER_PORTFOLIO_BENEFITS_URL = process.env.NEXT_PUBLIC_FRAMER_PORTFOLIO_BENEFITS_URL || '';
+
+export const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+    .split(',')
+    .map(email => email.trim().toLowerCase())
+    .filter(Boolean);

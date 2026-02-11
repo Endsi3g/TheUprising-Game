@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { FetchAuditSchema } from '@/lib/validators';
-import { crawlUrl, CrawlResult } from '@/lib/crawler';
+import { CrawlResult } from '@/lib/crawler';
 import { v4 as uuidv4 } from 'uuid';
 import { Crew, ResearchAgent, SeoSpecialistAgent, CopywriterAgent, UxAnalystAgent } from "@/lib/agents";
-import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { checkRateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const ip = getClientIp(request);
     if (!checkRateLimit(ip, 'audit-fetch', { limit: 5, windowMs: 60 * 1000 })) {
-        return rateLimitResponse();
+        return rateLimitResponse(60);
     }
 
     try {

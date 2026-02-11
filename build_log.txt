@@ -1,0 +1,117 @@
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 5 errors:
+./src/app/api/voice/transcribe/route.ts:2:1
+Module not found: Can't resolve 'openai'
+[0m [90m 1 |[39m [36mimport[39m { [33mNextRequest[39m[33m,[39m [33mNextResponse[39m } [36mfrom[39m [32m'next/server'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mimport[39m [33mOpenAI[39m [36mfrom[39m [32m'openai'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m [36mimport[39m { writeFile[33m,[39m unlink } [36mfrom[39m [32m'fs/promises'[39m[33m;[39m
+ [90m 4 |[39m [36mimport[39m { v4 [36mas[39m uuidv4 } [36mfrom[39m [32m'uuid'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m path [36mfrom[39m [32m'path'[39m[33m;[39m[0m
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./src/lib/llm.ts:2:1
+Module not found: Can't resolve 'openai'
+[0m [90m 1 |[39m [36mimport[39m { [33mGoogleGenerativeAI[39m } [36mfrom[39m [32m'@google/generative-ai'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mimport[39m [33mOpenAI[39m [36mfrom[39m [32m'openai'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m [36mimport[39m type { [33mConversationMessage[39m[33m,[39m [33mReportJson[39m } [36mfrom[39m [32m'@/types/database'[39m[33m;[39m
+ [90m 4 |[39m [36mimport[39m {
+ [90m 5 |[39m     buildSystemPrompt[33m,[39m[0m
+
+
+
+Import trace:
+  App Route:
+    ./src/lib/llm.ts
+    ./src/app/api/game/generate-report/route.ts
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./src/lib/crawler.ts:3:1
+Module not found: Can't resolve 'puppeteer'
+[0m [90m 1 |[39m [36mimport[39m axios [36mfrom[39m [32m'axios'[39m[33m;[39m
+ [90m 2 |[39m [36mimport[39m [33m*[39m [36mas[39m cheerio [36mfrom[39m [32m'cheerio'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m puppeteer [36mfrom[39m [32m'puppeteer'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 4 |[39m [36mimport[39m { promises [36mas[39m dns } [36mfrom[39m [32m'dns'[39m[33m;[39m
+ [90m 5 |[39m [36mimport[39m net [36mfrom[39m [32m'net'[39m[33m;[39m
+ [90m 6 |[39m[0m
+
+
+
+Import trace:
+  App Route:
+    ./src/lib/crawler.ts
+    ./src/lib/agents/researcher.ts
+    ./src/app/api/audit/fetch/route.ts
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./src/lib/tools/browser.ts:1:1
+Module not found: Can't resolve 'puppeteer'
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m puppeteer [36mfrom[39m [32m'puppeteer'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m
+ [90m 3 |[39m [90m/**[39m
+ [90m 4 |[39m [90m * Browses a URL and returns the text content.[39m[0m
+
+
+
+Import trace:
+  App Route:
+    ./src/lib/tools/browser.ts
+    ./src/lib/llm.ts
+    ./src/app/api/game/generate-report/route.ts
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./src/components/game/QRHandoff.tsx:1:1
+Module not found: Can't resolve 'qrcode.react'
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m { [33mQRCodeSVG[39m } [36mfrom[39m [32m'qrcode.react'[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [36mimport[39m { useEffect[33m,[39m useState } [36mfrom[39m [32m'react'[39m[33m;[39m
+ [90m 3 |[39m
+ [90m 4 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mQRHandoff[39m() {[0m
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/components/game/QRHandoff.tsx [Client Component Browser]
+    ./src/components/game/GameFlow.tsx [Client Component Browser]
+    ./src/app/game/audit/page.tsx [Client Component Browser]
+    ./src/app/game/audit/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/game/QRHandoff.tsx [Client Component SSR]
+    ./src/components/game/GameFlow.tsx [Client Component SSR]
+    ./src/app/game/audit/page.tsx [Client Component SSR]
+    ./src/app/game/audit/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./src/app/api/voice/transcribe/route.ts:2:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./src/lib/llm.ts:2:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./src/lib/crawler.ts:3:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./src/lib/tools/browser.ts:1:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./src/components/game/QRHandoff.tsx:1:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)

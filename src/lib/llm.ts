@@ -23,7 +23,8 @@ import { browse } from '@/lib/tools/browser';
 async function callOpenAI(
     systemPrompt: string,
     history: ConversationMessage[],
-    userMessage: string
+    userMessage: string,
+    imageDataUrl?: string
 ): Promise<string> {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error('Missing OPENAI_API_KEY');
@@ -34,13 +35,20 @@ async function callOpenAI(
     const cleanHistory = history.map(m => ({ role: m.role, content: m.content }));
 
     // Normalize messages for OpenAI
+    const userContent: OpenAI.Chat.ChatCompletionUserMessageParam['content'] = imageDataUrl
+        ? [
+            { type: 'text', text: userMessage },
+            { type: 'image_url', image_url: { url: imageDataUrl } },
+        ]
+        : userMessage;
+
     const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
         { role: 'system', content: systemPrompt },
         ...cleanHistory.map(m => ({
             role: m.role as 'user' | 'assistant' | 'system',
             content: m.content || ''
         })),
-        { role: 'user', content: userMessage }
+        { role: 'user', content: userContent }
     ];
 
     const tools: OpenAI.Chat.ChatCompletionTool[] = [
@@ -96,12 +104,13 @@ async function callOpenAI(
                         tool_call_id: tool.id,
                         content: result,
                     });
-                } catch (err: any) {
+                } catch (err: unknown) {
                     console.error('[LLM] Tool execution failed:', err);
+                    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
                     messages.push({
                         role: 'tool',
                         tool_call_id: tool.id,
-                        content: `Error: ${err.message}`,
+                        content: `Error: ${errorMessage}`,
                     });
                 }
             }
@@ -270,9 +279,10 @@ export async function chat(opts: {
     history: ConversationMessage[];
     userMessage: string;
     auditHtmlSummary?: string;
+    imageDataUrl?: string;
     provider?: 'openai' | 'perplexity' | 'gemini' | 'ollama' | 'grok'; // Optional override
 }): Promise<LLMResponse> {
-    const { mode, niche, language, history, userMessage, auditHtmlSummary, provider } = opts;
+    const { mode, niche, language, history, userMessage, auditHtmlSummary, provider, imageDataUrl } = opts;
 
     const systemPrompt = buildSystemPrompt({
         mode,
@@ -286,7 +296,7 @@ export async function chat(opts: {
     // 1. Try Preferred Provider if set
     if (preferredProvider === 'openai') {
         try {
-            const text = await callOpenAI(systemPrompt, history, userMessage);
+            const text = await callOpenAI(systemPrompt, history, userMessage, imageDataUrl);
             return { text, provider: 'openai' };
         } catch (e) {
             console.error('OpenAI failed:', e);
@@ -318,7 +328,7 @@ export async function chat(opts: {
 
     // Try OpenAI first
     try {
-        const text = await callOpenAI(systemPrompt, history, userMessage);
+        const text = await callOpenAI(systemPrompt, history, userMessage, imageDataUrl);
         return { text, provider: 'openai' };
     } catch (err) {
         console.warn('[LLM] OpenAI failed, trying fallbacks:', err);

@@ -2,10 +2,10 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { ArrowLeft, ArrowRight, Building2, LayoutDashboard, Stethoscope, Utensils, Info, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Building2, LayoutDashboard, Stethoscope, Utensils, Info } from 'lucide-react';
 import Ai04 from "@/components/ai-04";
 
-function CategoryButton({ icon: Icon, label, onSelect }: { icon: LucideIcon, label: string, onSelect: (label: string) => void }) {
+function CategoryButton({ icon: Icon, label, onSelect }: { icon: any, label: string, onSelect: (label: string) => void }) {
     return (
         <button
             onClick={() => onSelect(label)}

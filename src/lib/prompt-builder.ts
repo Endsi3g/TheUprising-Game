@@ -207,7 +207,14 @@ Respond ONLY with valid JSON in the following format:
     }
   ],
   "cta": "${language === 'fr' ? "Prêt à implémenter ce plan ? Prenez rendez-vous avec l'agence Uprising." : "Ready to implement? Book a call with Uprising Agency."}",
-  "best_practices_used": ["[practice 1]", "[practice 2]"]
+  "best_practices_used": ["[practice 1]", "[practice 2]"],
+  "roadmap": [
+    {
+      "phase": "Phase 1: [Name]",
+      "duration": "[Duration]",
+      "steps": ["[Step 1]", "[Step 2]"]
+    }
+  ]
 }
 `;
 }
