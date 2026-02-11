@@ -1,8 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import puppeteer from 'puppeteer';
-import { promises as dns } from 'dns';
-import net from 'net';
+import { assertPublicUrl } from './security';
 
 export interface CrawlResult {
     title: string;
@@ -19,62 +18,6 @@ export interface SearchResult {
     title: string;
     url: string;
     snippet: string;
-}
-
-function isPrivateIp(ip: string): boolean {
-    if (net.isIP(ip) === 4) {
-        const [a, b] = ip.split('.').map(Number);
-        if (a === 10 || a === 127 || a === 0) return true;
-        if (a === 169 && b === 254) return true;
-        if (a === 192 && b === 168) return true;
-        if (a === 172 && b >= 16 && b <= 31) return true;
-        if (a === 100 && b >= 64 && b <= 127) return true;
-        return false;
-    }
-
-    const normalized = ip.toLowerCase();
-    return (
-        normalized === '::1' ||
-        normalized.startsWith('fc') ||
-        normalized.startsWith('fd') ||
-        normalized.startsWith('fe80') ||
-        normalized === '::'
-    );
-}
-
-async function assertPublicHost(hostname: string) {
-    if (net.isIP(hostname)) {
-        if (isPrivateIp(hostname)) {
-            throw new Error('Access to private network resources is forbidden');
-        }
-        return;
-    }
-
-    const resolved = await dns.lookup(hostname, { all: true });
-    if (!resolved.length) {
-        throw new Error('Unable to resolve host');
-    }
-
-    for (const entry of resolved) {
-        if (isPrivateIp(entry.address)) {
-            throw new Error('Access to private network resources is forbidden');
-        }
-    }
-}
-
-async function assertPublicUrl(url: string) {
-    let parsed: URL;
-    try {
-        parsed = new URL(url);
-    } catch {
-        throw new Error('Invalid URL format');
-    }
-
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-        throw new Error('Only HTTP/HTTPS protocols are allowed');
-    }
-
-    await assertPublicHost(parsed.hostname.toLowerCase());
 }
 
 async function searchWithSerpApi(query: string, apiKey: string): Promise<SearchResult[]> {
