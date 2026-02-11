@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase';
 import { CreateLeadSchema } from '@/lib/validators';
 import { checkRateLimit, getClientIp, RATE_LIMITS, rateLimitResponse } from '@/lib/rate-limit';
 import { logLeadCreated } from '@/lib/logger';
+import { TENANT_ID } from '@/lib/config';
 
 export async function POST(request: NextRequest) {
     const ip = getClientIp(request);
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { tenantId, sessionId, firstName, email, sector, siteUrl, notes } =
+        const { sessionId, firstName, email, sector, siteUrl, notes } =
             parsed.data;
 
         const supabase = createServiceClient();
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
 
         const payload = {
             session_id: sessionId,
-            tenant_id: tenantId,
+            tenant_id: TENANT_ID,
             email,
             first_name: firstName,
             sector,
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
             Boolean(existingLead) ||
             (Boolean(upserted.updated_at) && upserted.updated_at !== upserted.created_at);
         if (!isUpdated) {
-            void logLeadCreated(tenantId, sessionId, email);
+            void logLeadCreated(TENANT_ID, sessionId, email);
         }
         return NextResponse.json({ leadId: upserted.id, updated: isUpdated });
 

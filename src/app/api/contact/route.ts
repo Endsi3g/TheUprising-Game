@@ -28,7 +28,7 @@ export async function POST(req: Request) {
         const { data, error } = await supabase
             .from('leads')
             .insert({
-                tenant_id: validated.tenantId || TENANT_ID,
+                tenant_id: TENANT_ID,
                 session_id: validated.sessionId || null,
                 first_name: validated.firstName,
                 email: validated.email,
