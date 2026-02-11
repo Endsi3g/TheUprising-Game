@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { StartSessionSchema } from '@/lib/validators';
 import { checkRateLimit, getClientIp, RATE_LIMITS, rateLimitResponse } from '@/lib/rate-limit';
 import { SessionStartError, startSessionService } from '@/lib/session-start';
+import { TENANT_ID } from '@/lib/config';
 
 export async function POST(request: NextRequest) {
     const ip = getClientIp(request);
@@ -20,9 +21,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { tenantId, mode, language, niche } = parsed.data;
+        const { mode, language, niche } = parsed.data;
         const payload = await startSessionService({
-            tenantId,
+            tenantId: TENANT_ID,
             mode,
             language,
             niche,

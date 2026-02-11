@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         const supabase = createServiceClient();
 
         const { error: insertError } = await supabase.from('event_logs').insert({
-            tenant_id: payload.tenantId || TENANT_ID,
+            tenant_id: TENANT_ID,
             session_id: payload.sessionId || null,
             event_type: payload.eventType,
             metadata: {

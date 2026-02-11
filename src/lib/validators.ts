@@ -20,7 +20,7 @@ export const NicheSchema = z.enum([
 // ─── API Request Schemas ──────────────────────────────────────────────────────
 
 export const StartSessionSchema = z.object({
-    tenantId: z.string().uuid(),
+    tenantId: z.string().uuid().optional(),
     mode: SessionModeSchema,
     language: LanguageSchema.optional().default('fr'),
     niche: NicheSchema.optional(),
@@ -47,7 +47,7 @@ export const FetchAuditSchema = z.object({
 });
 
 export const CreateLeadSchema = z.object({
-    tenantId: z.string().uuid(),
+    tenantId: z.string().uuid().optional(),
     sessionId: z.string().uuid(),
     firstName: z.string().min(1).max(200),
     email: z.string().email(),
