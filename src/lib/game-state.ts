@@ -39,12 +39,8 @@ export type GameAction =
     | { type: 'SET_ERROR'; error: string | null }
     | { type: 'SET_LOADING'; loading: boolean }
     | { type: 'SET_SESSION_ID'; sessionId: string }
-<<<<<<< HEAD
     | { type: 'HYDRATE'; state: GameState }
     | { type: 'SET_INITIALIZED' }
-=======
-    | { type: 'RESTORE_STATE'; state: Partial<GameState> }
->>>>>>> origin/master
     | { type: 'RESET' };
 
 // ─── Initial State ────────────────────────────────────────────────────────────
@@ -140,7 +136,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         case 'SET_SESSION_ID':
             return { ...state, sessionId: action.sessionId };
 
-<<<<<<< HEAD
         case 'HYDRATE':
             return {
                 ...action.state,
@@ -152,10 +147,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
         case 'SET_INITIALIZED':
             return { ...state, isInitialized: true };
-=======
-        case 'RESTORE_STATE':
-            return { ...state, ...action.state, isLoading: false, error: null };
->>>>>>> origin/master
 
         case 'RESET':
             return { ...initialGameState, isInitialized: true };

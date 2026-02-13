@@ -64,7 +64,7 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
                     const parsed = JSON.parse(stored);
                     // Minimal validation
                     if (parsed && typeof parsed === 'object') {
-                        dispatch({ type: 'RESTORE_STATE', state: parsed });
+                        dispatch({ type: 'HYDRATE', state: sanitizeHydratedState(parsed) });
                     }
                 }
             } catch (e) {
