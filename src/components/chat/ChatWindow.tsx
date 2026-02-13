@@ -77,6 +77,9 @@ export function ChatWindow() {
             audioRef.current = null;
         }
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
@@ -87,8 +90,11 @@ export function ChatWindow() {
                     mode: 'audit',
                     niche: 'General',
                     language: 'fr'
-                })
+                }),
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 throw new Error('API request failed');
@@ -107,15 +113,23 @@ export function ChatWindow() {
             // Auto-play TTS for the response
             playTTS(agentText);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Chat error:', error);
+
+            let errorMessage = "Désolé, je rencontre des difficultés techniques pour vous répondre.";
+
+            if (error.name === 'AbortError') {
+                errorMessage = "Le délai d'attente est dépassé. Veuillez réessayer ou reformuler votre question.";
+            }
+
             setMessages(prev => [...prev, {
                 role: "assistant",
-                content: "Désolé, je rencontre des difficultés techniques pour vous répondre.",
+                content: errorMessage,
                 timestamp: new Date().toISOString()
             }]);
         } finally {
             setIsLoading(false);
+            clearTimeout(timeoutId);
         }
     };
 

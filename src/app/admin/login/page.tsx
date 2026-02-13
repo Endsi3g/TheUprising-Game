@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { LayoutGrid, Lock, Mail, AlertCircle } from 'lucide-react';
+import { ADMIN_EMAILS } from '@/lib/config';
 
 const supabase = createPublicClient();
 
@@ -34,8 +35,7 @@ export default function AdminLoginPage() {
 
             // Check if user is admin
             const user = data.user;
-            const adminEmails = ['quebecsaas@gmail.com', 'theuprisingstudio@gmail.com'];
-            const isAdminByEmail = user?.email ? adminEmails.includes(user.email.toLowerCase()) : false;
+            const isAdminByEmail = user?.email ? ADMIN_EMAILS.includes(user.email.toLowerCase()) : false;
             const isAdminByRole = user?.app_metadata?.role === 'admin' || user?.user_metadata?.role === 'admin';
             const isAdmin = isAdminByEmail || isAdminByRole;
 

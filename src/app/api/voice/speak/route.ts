@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { textToSpeech } from '@/lib/tts-service';
-import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { checkRateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
     try {
-        const ip = req.headers.get('x-forwarded-for') || 'unknown';
+        const ip = getClientIp(req);
         if (!checkRateLimit(ip, 'tts', { limit: 10, windowMs: 60 * 1000 })) {
-            return rateLimitResponse();
+            return rateLimitResponse(60);
         }
 
         const body = await req.json();
@@ -35,8 +35,9 @@ export async function POST(req: NextRequest) {
             },
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('TTS API Error:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Internal Server Error';
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }

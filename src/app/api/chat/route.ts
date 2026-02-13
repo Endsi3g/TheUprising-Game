@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { chat } from '@/lib/llm';
-import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { checkRateLimit, getClientIp, RATE_LIMITS, rateLimitResponse } from '@/lib/rate-limit';
 import { ChatRequestSchema } from '@/lib/validators';
 import { createServiceClient } from '@/lib/supabase';
 import type { SessionMode, Niche } from '@/types/database';
 
 export async function POST(req: Request) {
-    const ip = req.headers.get('x-forwarded-for') || 'unknown';
-    if (!checkRateLimit(ip, 'chat', { limit: 20, windowMs: 60 * 1000 })) {
-        return rateLimitResponse();
+    const ip = getClientIp(req);
+    if (!checkRateLimit(ip, 'chat', RATE_LIMITS.chat)) {
+        return rateLimitResponse(60);
     }
 
     try {
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
             );
         }
 
-        const { message, history, mode, niche, language, sessionId } = parsed.data;
+        const { message, history, mode, niche, language, sessionId, imageDataUrl } = parsed.data;
 
         // Firecrawl: Detect URL and scrape
         let firecrawlContent: string | undefined;
@@ -49,8 +49,8 @@ export async function POST(req: Request) {
             niche: niche as Niche,
             language,
             firecrawlContent,
+            imageDataUrl,
         });
-
         // Persist to Supabase if sessionId is provided
         if (sessionId) {
             try {

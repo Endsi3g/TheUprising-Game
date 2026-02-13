@@ -74,11 +74,23 @@ export async function GET(request: Request) {
             const { data: supabaseData, error } = await query;
 
             if (error) {
+<<<<<<< HEAD
                 console.warn('[Catalogue] Supabase error, falling back to mock:', error.message);
                 usedMock = true;
             } else {
                 data = supabaseData as CatalogueItem[] ?? [];
             }
+=======
+                console.error('[Catalogue] Supabase error:', error);
+                throw error; // Let the catch block handle it
+            }
+
+            if (data && data.length > 0) {
+                return NextResponse.json(data);
+            }
+
+            console.log('[Catalogue] No data in Supabase, falling back to mock.');
+>>>>>>> origin/master
         } catch (error) {
             console.warn('[Catalogue] Supabase exception, falling back to mock:', error);
             usedMock = true;

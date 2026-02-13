@@ -4,12 +4,12 @@ import { writeFile, unlink } from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import os from 'os';
-import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit';
+import { checkRateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
-    const ip = req.headers.get('x-forwarded-for') || 'unknown';
+    const ip = getClientIp(req);
     if (!checkRateLimit(ip, 'transcribe', { limit: 5, windowMs: 60 * 1000 })) {
-        return rateLimitResponse();
+        return rateLimitResponse(60);
     }
 
     let tempFilePath: string | null = null;
@@ -56,15 +56,16 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ text: transcription.text });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Transcription error:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Internal Server Error';
+        return NextResponse.json({ error: message }, { status: 500 });
     } finally {
         // Cleanup temp file
         if (tempFilePath) {
             try {
                 await unlink(tempFilePath);
-            } catch (cleanupError) {
+            } catch {
                 // Ignore cleanup errors (file might not exist if write failed)
                 console.warn('Failed to delete temp file:', tempFilePath);
             }

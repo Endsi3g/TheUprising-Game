@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { createPublicClient } from '@/lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
+import { ADMIN_EMAILS } from '@/lib/config';
 
 export function useAuth() {
     const [user, setUser] = useState<User | null>(null);
@@ -42,8 +43,7 @@ export function useAuth() {
         };
     }, []);
 
-    const adminEmails = ['quebecsaas@gmail.com', 'theuprisingstudio@gmail.com'];
-    const isAdminByEmail = user?.email ? adminEmails.includes(user.email.toLowerCase()) : false;
+    const isAdminByEmail = user?.email ? ADMIN_EMAILS.includes(user.email.toLowerCase()) : false;
     const isAdminByRole = user?.app_metadata?.role === 'admin' || user?.user_metadata?.role === 'admin';
     const isAdmin = isAdminByEmail || isAdminByRole;
 

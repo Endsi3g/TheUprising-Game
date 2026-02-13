@@ -4,6 +4,9 @@ import { createContext, useContext, useReducer, useCallback, useEffect, type Rea
 import { toast } from 'sonner';
 import { gameReducer, initialGameState, type GameState, type GameAction } from '@/lib/game-state';
 import type { SessionMode, Niche, Language, ReportJson } from '@/types/database';
+import { trackAnalyticsEvent, trackServerEvent } from '@/lib/analytics-client';
+import { CLIENT_ANALYTICS_EVENTS, FUNNEL_EVENTS } from '@/lib/analytics/events';
+import { TENANT_ID } from '@/lib/config';
 
 const STORAGE_KEY = 'uprising_game_state';
 
@@ -38,19 +41,58 @@ interface GameContextValue {
     addAssistantMessage: (content: string) => void;
     setReport: (report: ReportJson) => void;
     reset: () => void;
-    sendMessage: (content: string) => Promise<void>;
+    sendMessage: (content: string, options?: { imageDataUrl?: string }) => Promise<void>;
 }
-
 const GameContext = createContext<GameContextValue | null>(null);
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function GameProvider({ children, initialMode }: { children: ReactNode; initialMode?: SessionMode }) {
+    // Initialize state (always start with default to avoid hydration mismatch)
     const [state, dispatch] = useReducer(gameReducer, {
         ...initialGameState,
         mode: initialMode ?? null,
         phase: initialMode ? 'company_info' : 'mode_select',
     });
+
+    // Restore state from local storage on mount
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const stored = localStorage.getItem('salon-ai-game-state');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    // Minimal validation
+                    if (parsed && typeof parsed === 'object') {
+                        dispatch({ type: 'RESTORE_STATE', state: parsed });
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load game state', e);
+            }
+        }
+    }, []);
+
+    // Persist state to local storage
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                // Don't persist loading or error states
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { isLoading, error, ...persistedState } = state;
+                localStorage.setItem('salon-ai-game-state', JSON.stringify(persistedState));
+            } catch (e) {
+                console.error('Failed to save game state', e);
+            }
+        }
+    }, [state]);
+
+    // Clear storage on reset/logout
+    const clearStorage = useCallback(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('salon-ai-game-state');
+        }
+    }, []);
 
     const selectMode = useCallback((mode: SessionMode) => {
         dispatch({ type: 'SELECT_MODE', mode });
@@ -81,10 +123,11 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
     }, []);
 
     const reset = useCallback(() => {
+        clearStorage();
         dispatch({ type: 'RESET' });
-    }, []);
+    }, [clearStorage]);
 
-    const sendMessage = useCallback(async (content: string) => {
+    const sendMessage = useCallback(async (content: string, options?: { imageDataUrl?: string }) => {
         if (!content.trim()) return;
 
         dispatch({ type: 'ADD_USER_MESSAGE', content });
@@ -92,10 +135,14 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
         dispatch({ type: 'SET_ERROR', error: null });
 
         try {
-            const res = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+            const hasSession = Boolean(state.sessionId);
+            const endpoint = hasSession ? `/api/session/${state.sessionId}/message` : '/api/chat';
+            const payload = hasSession
+                ? {
+                    message: content,
+                    imageDataUrl: options?.imageDataUrl,
+                }
+                : {
                     message: content,
                     mode: state.mode ?? undefined,
                     niche: state.niche ?? undefined,
@@ -104,7 +151,13 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
                     siteUrl: state.siteUrl,
                     history: state.conversation,
                     sessionId: state.sessionId ?? undefined,
-                }),
+                    imageDataUrl: options?.imageDataUrl,
+                };
+
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
             });
 
             if (!res.ok) {
@@ -113,12 +166,12 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
             }
 
             const data = await res.json();
-            const assistantMsg = data.message ?? data.response ?? '';
+            const assistantMsg = data.reply ?? data.message ?? data.response ?? '';
 
             dispatch({ type: 'ADD_ASSISTANT_MESSAGE', content: assistantMsg });
 
             // Check if AI signals report readiness
-            if (assistantMsg.includes('[READY_FOR_REPORT]')) {
+            if (Boolean(data.readyForReport) || assistantMsg.includes('[READY_FOR_REPORT]')) {
                 dispatch({ type: 'START_REPORT_GENERATION' });
             }
         } catch (err) {
@@ -135,10 +188,11 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
         if (state.phase === 'conversation' && !state.sessionId && state.companyName && state.mode) {
             const startSession = async () => {
                 try {
-                    const res = await fetch('/api/game/session/start', {
+                    const res = await fetch('/api/session/start', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
+                            tenantId: TENANT_ID,
                             mode: state.mode,
                             niche: state.niche,
                             language: state.language,
@@ -151,6 +205,16 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
                         const data = await res.json();
                         if (data.sessionId) {
                             dispatch({ type: 'SET_SESSION_ID', sessionId: data.sessionId });
+                            if (state.mode === 'audit') {
+                                trackAnalyticsEvent(CLIENT_ANALYTICS_EVENTS.AUDIT_STARTED, { mode: 'audit' });
+                                trackServerEvent(FUNNEL_EVENTS.AUDIT_STARTED, {
+                                    sessionId: data.sessionId,
+                                    metadata: {
+                                        mode: state.mode,
+                                        niche: state.niche,
+                                    },
+                                });
+                            }
                         }
                     }
                 } catch (err) {
@@ -208,28 +272,53 @@ export function GameProvider({ children, initialMode }: { children: ReactNode; i
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-                    const res = await fetch('/api/game/generate-report', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            mode: state.mode,
-                            niche: state.niche,
-                            language: state.language,
-                            history: state.conversation,
-                            companyName: state.companyName,
-                            siteUrl: state.siteUrl,
-                            sessionId: state.sessionId,
-                        }),
-                        signal: controller.signal
-                    });
+                    const hasSession = Boolean(state.sessionId);
+                    const res = hasSession
+                        ? await fetch(`/api/session/${state.sessionId}/complete`, {
+                            method: 'POST',
+                            signal: controller.signal
+                        })
+                        : await fetch('/api/game/generate-report', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                mode: state.mode,
+                                niche: state.niche,
+                                language: state.language,
+                                history: state.conversation,
+                                companyName: state.companyName,
+                                siteUrl: state.siteUrl,
+                                sessionId: state.sessionId,
+                            }),
+                            signal: controller.signal
+                        });
 
                     clearTimeout(timeoutId);
 
-                    if (!res.ok) throw new Error('Report generation failed');
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        if (hasSession && data.report) {
+                            if (mounted) {
+                                dispatch({ type: 'SET_REPORT', report: data.report });
+                            }
+                            return;
+                        }
+                        throw new Error(data.error || 'Report generation failed');
+                    }
 
-                    const data = await res.json();
                     if (mounted) {
                         dispatch({ type: 'SET_REPORT', report: data.report });
+                        if (state.mode === 'audit') {
+                            trackAnalyticsEvent(CLIENT_ANALYTICS_EVENTS.AUDIT_COMPLETED, { mode: 'audit' });
+                            trackServerEvent(FUNNEL_EVENTS.AUDIT_COMPLETED, {
+                                sessionId: state.sessionId || undefined,
+                                metadata: {
+                                    mode: state.mode,
+                                    niche: state.niche,
+                                    messages: state.conversation.length,
+                                },
+                            });
+                        }
                     }
                 } catch (err) {
                     console.error(err);

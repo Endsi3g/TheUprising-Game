@@ -4,6 +4,8 @@ import { Toaster } from "sonner";
 import { PlausibleScript } from "@/components/analytics/PlausibleScript";
 import { CrispChat } from "@/components/support/CrispChat";
 import "./globals.css";
+import { Toaster } from "sonner";
+import { AnalyticsScripts } from '@/components/analytics/AnalyticsScripts';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,12 +29,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+<<<<<<< HEAD
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+=======
+    <html lang="fr">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+>>>>>>> origin/master
         {children}
         <PlausibleScript />
         <CrispChat />
         <Toaster position="top-center" richColors />
+        <AnalyticsScripts />
       </body>
     </html>
   );

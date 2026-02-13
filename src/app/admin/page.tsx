@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ComponentType, type SVGProps } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Activity, CheckCircle, Target, TrendingUp, Users, MessageSquare } from 'lucide-react';
+import { Activity, CheckCircle, Target, TrendingUp, Users, BarChart3 } from 'lucide-react';
 import { TENANT_ID } from '@/lib/config';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -22,13 +22,26 @@ interface OverviewData {
         created_at: string;
         completed_at: string | null;
     }>;
+    funnel: {
+        visits: number;
+        audits_started: number;
+        audits_completed: number;
+        leads_created: number;
+        visit_to_start_rate: number;
+        start_to_complete_rate: number;
+        complete_to_lead_rate: number;
+        full_funnel_rate: number;
+    };
+    analytics: {
+        ga4_enabled: boolean;
+        plausible_enabled: boolean;
+    };
 }
 
 export default function AdminOverviewPage() {
     const { user, session, loading: authLoading } = useAuth();
     const router = useRouter();
     const [data, setData] = useState<OverviewData | null>(null);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     // Auth Guard
@@ -40,8 +53,7 @@ export default function AdminOverviewPage() {
 
     // Data Fetch
     useEffect(() => {
-        if (!user || !session) {
-            if (!authLoading) setLoading(false);
+        if (authLoading || !user || !session) {
             return;
         }
 
@@ -58,11 +70,10 @@ export default function AdminOverviewPage() {
                 if (json.error) setError(json.error);
                 else setData(json);
             })
-            .catch((err) => setError(err.message || 'Failed to load overview'))
-            .finally(() => setLoading(false));
-    }, [user, session]);
+            .catch((err) => setError(err.message || 'Failed to load overview'));
+    }, [authLoading, user, session]);
 
-    if (authLoading || loading) return <DashboardSkeleton />;
+    if (authLoading || (user && session && !data && !error)) return <DashboardSkeleton />;
     if (!user) return null; // Will redirect
     if (error) return <div className="p-8 text-center text-red-500 font-medium">❌ Erreur: {error}</div>;
     if (!data) return null;
@@ -70,10 +81,18 @@ export default function AdminOverviewPage() {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Vue d'ensemble</h1>
+                <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Vue d&apos;ensemble</h1>
                 <p className="text-gray-500 dark:text-gray-400 mt-2">
                     Métriques temps réel pour votre kiosque Salon AI
                 </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                    <Badge variant={data.analytics?.ga4_enabled ? 'default' : 'secondary'}>
+                        GA4 {data.analytics?.ga4_enabled ? 'actif' : 'inactif'}
+                    </Badge>
+                    <Badge variant={data.analytics?.plausible_enabled ? 'default' : 'secondary'}>
+                        Plausible {data.analytics?.plausible_enabled ? 'actif' : 'inactif'}
+                    </Badge>
+                </div>
             </div>
 
             {/* KPI Cards */}
@@ -83,6 +102,32 @@ export default function AdminOverviewPage() {
                 <KpiCard title="Leads capturés" value={data.total_leads} icon={Target} color="text-amber-500" />
                 <KpiCard title="Taux conversion" value={`${data.conversion_rate}%`} icon={TrendingUp} color="text-rose-500" />
             </div>
+
+            <Card className="shadow-sm border-border-light dark:border-border-dark bg-white dark:bg-surface-dark">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4 text-blue-600" />
+                        Funnel de conversion Audit
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid gap-3 md:grid-cols-4">
+                        <FunnelStep label="Visite" value={data.funnel.visits} />
+                        <FunnelStep label="Audit démarre" value={data.funnel.audits_started} rate={data.funnel.visit_to_start_rate} />
+                        <FunnelStep label="Audit terminé" value={data.funnel.audits_completed} rate={data.funnel.start_to_complete_rate} />
+                        <FunnelStep label="Lead créé" value={data.funnel.leads_created} rate={data.funnel.complete_to_lead_rate} />
+                    </div>
+                    <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                        <div
+                            className="h-full rounded-full bg-gradient-to-r from-blue-500 via-emerald-500 to-amber-500 transition-all"
+                            style={{ width: `${data.funnel.full_funnel_rate}%` }}
+                        />
+                    </div>
+                    <p className="mt-2 text-xs text-gray-500">
+                        Conversion complete visite vers lead: <span className="font-bold text-gray-800 dark:text-gray-200">{data.funnel.full_funnel_rate}%</span>
+                    </p>
+                </CardContent>
+            </Card>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                 {/* Recent Sessions */}
@@ -148,7 +193,17 @@ export default function AdminOverviewPage() {
 
 // ─── Components ───────────────────────────────────────────────────────────────
 
-function KpiCard({ title, value, icon: Icon, color }: { title: string; value: string | number; icon: any; color: string }) {
+function KpiCard({
+    title,
+    value,
+    icon: Icon,
+    color,
+}: {
+    title: string;
+    value: string | number;
+    icon: ComponentType<SVGProps<SVGSVGElement>>;
+    color: string;
+}) {
     return (
         <Card className="shadow-sm border-border-light dark:border-border-dark bg-white dark:bg-surface-dark hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -161,6 +216,18 @@ function KpiCard({ title, value, icon: Icon, color }: { title: string; value: st
                 <div className="text-2xl font-bold">{value}</div>
             </CardContent>
         </Card>
+    );
+}
+
+function FunnelStep({ label, value, rate }: { label: string; value: number; rate?: number }) {
+    return (
+        <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/5">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-500">{label}</p>
+            <p className="mt-1 text-2xl font-black text-gray-900 dark:text-gray-100">{value}</p>
+            {typeof rate === 'number' && (
+                <p className="mt-1 text-xs font-semibold text-blue-600">{rate}% conversion etape precedente</p>
+            )}
+        </div>
     );
 }
 

@@ -4,8 +4,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { LayoutGrid, ArrowLeft, ArrowRight, ArrowUpRight, Monitor, Smartphone, ShoppingBag } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
-import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { PortfolioBenefits } from '@/components/portfolio/PortfolioBenefits';
+import { ProjectCard } from '@/components/portfolio/ProjectCard';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { FRAMER_PORTFOLIO_BENEFITS_URL } from '@/lib/config';
 
 const projects = [
     {
@@ -62,13 +66,52 @@ export default function PortfolioPage() {
 
     const scroll = (direction: 'left' | 'right') => {
         if (carouselRef.current) {
-            const scrollAmount = carouselRef.current.clientWidth * 0.8;
-            carouselRef.current.scrollBy({
-                left: direction === 'left' ? -scrollAmount : scrollAmount,
-                behavior: 'smooth'
+            const container = carouselRef.current;
+            const scrollLeft = container.scrollLeft;
+            const containerCenter = scrollLeft + container.clientWidth / 2;
+
+            // Find current centered item
+            const children = Array.from(container.children) as HTMLElement[];
+            // Filter AnimatePresence artifacts if any, though usually direct children are what we want
+            // The scroll container has AnimatePresence's children.
+            // Wait, AnimatePresence renders children directly.
+            // But checking children[0] which is AnimatePresence? No, AnimatePresence is not a DOM element?
+            // Actually AnimatePresence returns children.
+            // Let's assume container.children are the snap items.
+
+            let closestDist = Infinity;
+            let closestIndex = 0;
+
+            children.forEach((child, index) => {
+                const childCenter = child.offsetLeft + child.offsetWidth / 2;
+                const dist = Math.abs(childCenter - containerCenter);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestIndex = index;
+                }
             });
+<<<<<<< HEAD
             // Re-check scroll state after animation (approximate delay)
             setTimeout(checkScroll, 500);
+=======
+
+            // Calculate target index. If we are already centered, move to next.
+            // If slightly off, move to the intuitive next/prev.
+            // With snap-mandatory, we are always centered or moving to center.
+            let targetIndex = direction === 'left' ? closestIndex - 1 : closestIndex + 1;
+
+            // Boundary checks
+            targetIndex = Math.max(0, Math.min(targetIndex, children.length - 1));
+
+            const targetItem = children[targetIndex];
+            if (targetItem) {
+                const targetScroll = targetItem.offsetLeft - (container.clientWidth / 2) + (targetItem.offsetWidth / 2);
+                container.scrollTo({
+                    left: targetScroll,
+                    behavior: 'smooth'
+                });
+            }
+>>>>>>> origin/master
         }
     };
 
@@ -76,13 +119,7 @@ export default function PortfolioPage() {
         <div className="min-h-screen flex flex-col overflow-hidden bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 font-sans selection:bg-gray-200 dark:selection:bg-gray-700">
 
             {/* Header */}
-            <header className="w-full px-8 py-6 flex justify-between items-center z-20">
-                <Link href="/" className="flex items-center gap-2 group">
-                    <div className="w-10 h-10 rounded-xl bg-black dark:bg-white flex items-center justify-center transition-transform group-hover:rotate-12">
-                        <LayoutGrid className="w-5 h-5 text-white dark:text-black" />
-                    </div>
-                    <span className="text-sm font-black tracking-tighter">THE UPRISING</span>
-                </Link>
+            <PageHeader>
                 <div className="flex items-center gap-6">
                     <div className="text-right hidden sm:block">
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Portfolio</p>
@@ -92,7 +129,7 @@ export default function PortfolioPage() {
                         Démarrer un projet
                     </Link>
                 </div>
-            </header>
+            </PageHeader>
 
             {/* Main Content */}
             <main className="flex-grow flex flex-col relative w-full overflow-hidden">
@@ -154,6 +191,7 @@ export default function PortfolioPage() {
                                         transition={{ delay: idx * 0.1 }}
                                         className="snap-center"
                                     >
+<<<<<<< HEAD
                                         <Link
                                             href={`/portfolio/${project.slug}`}
                                             className="relative block flex-shrink-0 w-[85vw] md:w-[600px] lg:w-[800px] bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 rounded-[2.5rem] overflow-hidden shadow-2xl hover:shadow-card-hover transition-all duration-500 group cursor-pointer h-full"
@@ -195,6 +233,9 @@ export default function PortfolioPage() {
                                                 </div>
                                             </div>
                                         </Link>
+=======
+                                        <ProjectCard project={project} />
+>>>>>>> origin/master
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
@@ -239,6 +280,8 @@ export default function PortfolioPage() {
                             </div>
                         </div>
                     </div>
+
+                    <PortfolioBenefits framerUrl={FRAMER_PORTFOLIO_BENEFITS_URL} />
 
                 </div>
             </main>

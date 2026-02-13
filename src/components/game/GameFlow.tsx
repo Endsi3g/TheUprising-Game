@@ -1,22 +1,24 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback, type ComponentType, type SVGProps } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useGame } from '@/hooks/use-game';
 import { getPhaseProgress, getPhaseLabel } from '@/lib/game-state';
-import { Send, Mic, MicOff, Loader2, ArrowRight, Volume2, VolumeX, Smartphone, type LucideIcon } from 'lucide-react';
+import { Send, Mic, MicOff, Loader2, ArrowRight, Volume2, VolumeX, Smartphone, ImagePlus, X } from 'lucide-react';
 import type { Niche } from '@/types/database';
 import Avatar from '@/components/game/Avatar';
 import { useVoiceRecorder } from '@/hooks/use-voice-recorder';
 import { useTTS } from '@/hooks/use-tts';
 import QRHandoff from '@/components/game/QRHandoff';
 import { trackEvent } from '@/lib/analytics';
+import { useAudioFeedback } from '@/hooks/use-audio-feedback';
 
 // ─── Niche Selection Grid ─────────────────────────────────────────────────────
 
 interface NicheOption {
     id: Niche;
     label: string;
-    icon: LucideIcon;
+    icon: ComponentType<SVGProps<SVGSVGElement>>;
 }
 
 export function NicheSelector({ niches, onSelect }: { niches: NicheOption[]; onSelect: (niche: Niche) => void }) {
@@ -140,48 +142,22 @@ export function CompanyInfoForm({ mode, showSiteUrl, onSubmit }: { mode?: string
 export function ConversationPanel() {
     const { state, sendMessage } = useGame();
     const [input, setInput] = useState('');
+    const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
+    const [imageName, setImageName] = useState<string | null>(null);
     const endRef = useRef<HTMLDivElement>(null);
-    const { isRecording, startRecording, stopRecording, transcript, resetTranscript } = useVoiceRecorder();
+    const imageInputRef = useRef<HTMLInputElement>(null);
+    const appendTranscript = useCallback((capturedText: string) => {
+        setInput((prev) => (prev ? `${prev} ${capturedText}` : capturedText));
+    }, []);
+
+    const { isRecording, isTranscribing, startRecording, stopRecording, error: voiceError } = useVoiceRecorder({
+        onTranscript: appendTranscript,
+    });
     const { speak, stop: stopTTS, isPlaying: isTTSPlaying } = useTTS();
     const [isSoundEnabled, setIsSoundEnabled] = useState(false); // Default off to avoid startling
     const [showQR, setShowQR] = useState(false);
-
-    const playUiTone = (frequency: number, durationMs = 100) => {
-        if (!isSoundEnabled || typeof window === 'undefined') return;
-        try {
-            const AudioCtx = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-            if (!AudioCtx) return;
-
-            const context = new AudioCtx();
-            const oscillator = context.createOscillator();
-            const gain = context.createGain();
-            oscillator.frequency.value = frequency;
-            oscillator.type = 'sine';
-            gain.gain.setValueAtTime(0.001, context.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.08, context.currentTime + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + durationMs / 1000);
-            oscillator.connect(gain);
-            gain.connect(context.destination);
-            oscillator.start();
-            oscillator.stop(context.currentTime + durationMs / 1000);
-        } catch {
-            // Ignore audio feedback failures silently.
-        }
-    };
-
-    // Sync voice transcript to input
-    useEffect(() => {
-        if (transcript) {
-            setInput((prev) => (prev ? prev + ' ' : '') + transcript);
-            // resetTranscript(); // Move this out of the sync loop if it triggers render
-        }
-    }, [transcript]);
-
-    useEffect(() => {
-        if (transcript) {
-            resetTranscript();
-        }
-    }, [transcript, resetTranscript]);
+    const lastAssistantIndexRef = useRef<number>(-1);
+    const { play } = useAudioFeedback(isSoundEnabled);
 
     // Auto-scroll
     useEffect(() => {
@@ -190,27 +166,67 @@ export function ConversationPanel() {
 
     // Auto-TTS for new assistant messages
     useEffect(() => {
-        if (!isSoundEnabled) return;
+        const lastIndex = state.conversation.length - 1;
+        const lastMsg = state.conversation[lastIndex];
+        const isNewAssistantMessage =
+            !!lastMsg &&
+            lastMsg.role === 'assistant' &&
+            lastAssistantIndexRef.current !== lastIndex;
 
-        const lastMsg = state.conversation[state.conversation.length - 1];
-        if (lastMsg && lastMsg.role === 'assistant') {
-            playUiTone(740, 90);
+        if (!isNewAssistantMessage) return;
+
+        lastAssistantIndexRef.current = lastIndex;
+
+        if (isSoundEnabled) {
+            play('message-receive');
             stopTTS();
             speak(lastMsg.content);
         }
-    }, [state.conversation, isSoundEnabled, speak, stopTTS]);
+    }, [state.conversation, isSoundEnabled, play, speak, stopTTS]);
 
     const handleSend = async () => {
-        if (!input.trim() || state.isLoading) return;
+        if ((!input.trim() && !imageDataUrl) || state.isLoading) return;
         stopTTS(); // Stop speaking when user sends message
-        const msg = input.trim();
+        play('message-send');
+        const msg = input.trim() || 'Analyse cette capture d\'ecran.';
         setInput('');
-        playUiTone(520, 80);
         trackEvent('game_chat_message_sent', {
             mode: state.mode || 'unknown',
             conversation_length: state.conversation.length,
         });
-        await sendMessage(msg);
+
+        await sendMessage(msg, { imageDataUrl: imageDataUrl || undefined });
+        setImageDataUrl(null);
+        setImageName(null);
+    };
+
+    const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) return;
+
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result || ''));
+            reader.onerror = () => reject(new Error('Failed to read image file'));
+            reader.readAsDataURL(file);
+        });
+
+        setImageDataUrl(dataUrl);
+        setImageName(file.name);
+    };
+
+    const handleVoiceToggle = async () => {
+        if (isTranscribing) return;
+
+        if (isRecording) {
+            stopRecording();
+            play('record-stop');
+            return;
+        }
+
+        await startRecording();
+        play('record-start');
     };
 
     // Determine Avatar State
@@ -237,7 +253,11 @@ export function ConversationPanel() {
                 <button
                     onClick={() => {
                         if (isSoundEnabled) stopTTS();
-                        setIsSoundEnabled(!isSoundEnabled);
+                        const nextValue = !isSoundEnabled;
+                        setIsSoundEnabled(nextValue);
+                        if (nextValue) {
+                            play('toggle-on');
+                        }
                     }}
                     className="p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm transition-colors text-gray-500"
                     title={isSoundEnabled ? "Couper le son" : "Activer le son"}
@@ -283,16 +303,25 @@ export function ConversationPanel() {
                     </div>
                 )}
 
-                {state.conversation.map((msg, i) => (
-                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
-                        <div className={`max-w-[85%] p-4 rounded-2xl shadow-sm ${msg.role === 'user'
-                            ? 'bg-black text-white dark:bg-white dark:text-black rounded-br-sm'
-                            : 'bg-white/80 dark:bg-surface-dark/80 backdrop-blur-sm text-gray-800 dark:text-gray-200 rounded-bl-sm border border-gray-100 dark:border-gray-700'
-                            }`}>
-                            <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                        </div>
-                    </div>
-                ))}
+                <AnimatePresence initial={false}>
+                    {state.conversation.map((msg, i) => (
+                        <motion.div
+                            key={`${msg.role}-${i}-${msg.timestamp || i}`}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            transition={{ duration: 0.2 }}
+                            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                            <div className={`max-w-[85%] p-4 rounded-2xl shadow-sm ${msg.role === 'user'
+                                ? 'bg-black text-white dark:bg-white dark:text-black rounded-br-sm'
+                                : 'bg-white/80 dark:bg-surface-dark/80 backdrop-blur-sm text-gray-800 dark:text-gray-200 rounded-bl-sm border border-gray-100 dark:border-gray-700'
+                                }`}>
+                                <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                            </div>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
 
                 {state.isLoading && (
                     <div className="flex justify-start animate-in fade-in duration-300">
@@ -320,14 +349,46 @@ export function ConversationPanel() {
                     </div>
                 )}
 
+                {voiceError && (
+                    <div className="flex justify-center my-2">
+                        <p className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs font-medium text-red-500">
+                            {voiceError}
+                        </p>
+                    </div>
+                )}
+
                 <div ref={endRef} />
             </div>
 
             {/* Input Bar */}
             <div className="p-4 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800 sticky bottom-0 z-20">
+                <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                />
+                {imageDataUrl && (
+                    <div className="mb-2 mx-auto max-w-3xl flex items-center justify-between rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600">
+                        <span className="truncate pr-3">Capture: {imageName || 'image'}</span>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setImageDataUrl(null);
+                                setImageName(null);
+                            }}
+                            className="rounded-md p-1 text-gray-500 transition-colors hover:bg-gray-100 hover:text-black"
+                            title="Retirer la capture"
+                        >
+                            <X className="h-3.5 w-3.5" />
+                        </button>
+                    </div>
+                )}
                 <div className="flex items-center gap-3 max-w-3xl mx-auto relative">
                     <button
-                        onClick={() => isRecording ? stopRecording() : startRecording()}
+                        onClick={handleVoiceToggle}
+                        disabled={isTranscribing}
                         className={`p-4 rounded-full transition-all duration-300 ${isRecording
                             ? 'bg-red-500 text-white animate-pulse shadow-lg scale-110'
                             : 'bg-gray-100 dark:bg-surface-dark text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
@@ -335,6 +396,14 @@ export function ConversationPanel() {
                         title={isRecording ? "Arrêter l'enregistrement" : "Enregistrement vocal"}
                     >
                         {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => imageInputRef.current?.click()}
+                        className="p-4 rounded-full bg-gray-100 dark:bg-surface-dark text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        title="Ajouter une capture d'écran"
+                    >
+                        <ImagePlus className="w-5 h-5" />
                     </button>
 
                     <div className="flex-1 relative">
@@ -347,7 +416,7 @@ export function ConversationPanel() {
                                     handleSend();
                                 }
                             }}
-                            placeholder={isRecording ? "Écoute en cours..." : "Écrivez votre message..."}
+                            placeholder={isRecording ? "Ecoute en cours..." : isTranscribing ? "Transcription en cours..." : "Ecrivez votre message..."}
                             disabled={state.isLoading}
                             rows={1}
                             className="w-full px-5 py-3.5 pr-12 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-white dark:bg-surface-dark focus:border-black dark:focus:border-white focus:outline-none transition-colors disabled:opacity-50 resize-none min-h-[56px] max-h-32"
@@ -355,7 +424,7 @@ export function ConversationPanel() {
                         />
                         <button
                             onClick={handleSend}
-                            disabled={!input.trim() || state.isLoading}
+                            disabled={(!input.trim() && !imageDataUrl) || state.isLoading}
                             title="Envoyer le message"
                             className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-0 disabled:pointer-events-none scale-90 hover:scale-100"
                         >
@@ -365,7 +434,7 @@ export function ConversationPanel() {
                 </div>
                 <div className="text-center mt-2">
                     <p className="text-[10px] text-gray-400 uppercase tracking-widest">
-                        {isRecording ? 'Enregistrement vocal actif' : 'Pressez Entrée pour envoyer'}
+                        {isRecording ? 'Enregistrement vocal actif' : isTranscribing ? 'Transcription en cours' : 'Pressez Entree pour envoyer'}
                     </p>
                 </div>
             </div>

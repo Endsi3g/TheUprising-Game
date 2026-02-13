@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { ArrowLeft, ArrowUpRight, Monitor, Smartphone, ShoppingBag, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Monitor, Smartphone, ShoppingBag } from 'lucide-react';
 
 interface Project {
     id: number;
@@ -11,7 +11,7 @@ interface Project {
     description: string;
     longDescription: string;
     category: string;
-    icon: LucideIcon;
+    icon: any;
     techStack: string[];
     results: string[];
 }

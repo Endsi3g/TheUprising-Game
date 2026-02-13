@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGame } from '@/hooks/use-game';
 import { ReportDisplay } from '@/components/game/ReportDisplay';
+import { RoadmapDisplay } from '@/components/game/RoadmapDisplay';
 import { ArrowLeft, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -77,6 +78,8 @@ export default function StartupResultsPage() {
                     title="Stratégie de Lancement Prête ! 🚀"
                     iconColorClass="bg-green-600"
                 />
+
+                <RoadmapDisplay roadmap={state.report.roadmap} />
             </main>
         </div>
     );

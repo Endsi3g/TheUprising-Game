@@ -71,6 +71,7 @@ export async function sendReportEmail(opts: {
     return { id: data?.id || '' };
 }
 
+<<<<<<< HEAD
 export async function sendFollowupEmail(opts: {
     to: string;
     firstName?: string;
@@ -124,6 +125,47 @@ export async function sendFollowupEmail(opts: {
 
     if (error) {
         throw new Error(`Follow-up email failed: ${error.message}`);
+=======
+/**
+ * Sends a contact form notification to the admin.
+ */
+export async function sendContactEmail(opts: {
+    name: string;
+    email: string;
+    type: string;
+    company?: string;
+    message: string;
+}): Promise<{ id: string }> {
+    const apiKey = process.env.RESEND_API_KEY;
+    const from = process.env.EMAIL_FROM || 'noreply@salon-ai.app';
+    const adminEmail = process.env.ADMIN_EMAIL || 'contact@theuprising-game.com';
+
+    if (!apiKey) return { id: '' };
+
+    const resend = new Resend(apiKey);
+
+    const { data, error } = await resend.emails.send({
+        from,
+        to: adminEmail,
+        replyTo: opts.email,
+        subject: `[LEAD] Nouveau contact : ${opts.name} (${opts.type})`,
+        text: `
+Nouveau contact reçu via le site :
+
+Nom : ${opts.name}
+Email : ${opts.email}
+Type : ${opts.type}
+Entreprise : ${opts.company || 'Non spécifié'}
+
+Message :
+${opts.message}
+        `,
+    });
+
+    if (error) {
+        console.error('Failed to send contact email:', error);
+        throw new Error(error.message);
+>>>>>>> origin/master
     }
 
     return { id: data?.id || '' };

@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 
 interface UseVoiceRecorderReturn {
     isRecording: boolean;
+    isTranscribing: boolean;
     startRecording: () => Promise<void>;
     stopRecording: () => void;
     transcript: string;
@@ -9,12 +10,22 @@ interface UseVoiceRecorderReturn {
     error: string | null;
 }
 
-export function useVoiceRecorder(): UseVoiceRecorderReturn {
+interface UseVoiceRecorderOptions {
+    onTranscript?: (text: string) => void;
+}
+
+export function useVoiceRecorder(options: UseVoiceRecorderOptions = {}): UseVoiceRecorderReturn {
     const [isRecording, setIsRecording] = useState(false);
+    const [isTranscribing, setIsTranscribing] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [error, setError] = useState<string | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
+    const onTranscriptRef = useRef(options.onTranscript);
+
+    useEffect(() => {
+        onTranscriptRef.current = options.onTranscript;
+    }, [options.onTranscript]);
 
     const startRecording = useCallback(async () => {
         try {
@@ -34,6 +45,7 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
                 const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
 
                 try {
+                    setIsTranscribing(true);
                     const formData = new FormData();
                     formData.append('file', audioBlob, 'audio.webm');
                     formData.append('model', 'whisper-1');
@@ -49,10 +61,13 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
                     const data = await response.json();
                     if (data.text) {
                         setTranscript(data.text);
+                        onTranscriptRef.current?.(data.text);
                     }
                 } catch (err) {
                     console.error('Transcription error:', err);
                     setError('Erreur de transcription.');
+                } finally {
+                    setIsTranscribing(false);
                 }
 
                 // Clean up tracks
@@ -66,6 +81,7 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
         } catch (err) {
             console.error('Failed to access microphone:', err);
             setError('Accès au micro refusé ou impossible.');
+            setIsTranscribing(false);
         }
     }, []);
 
@@ -91,6 +107,7 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
 
     return {
         isRecording,
+        isTranscribing,
         startRecording,
         stopRecording,
         transcript,

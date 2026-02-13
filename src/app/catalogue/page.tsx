@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LayoutGrid, ArrowLeft, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import type { CatalogueItem } from '@/types/database';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 export default function CataloguePage() {
     const [items, setItems] = useState<CatalogueItem[]>([]);
@@ -16,12 +17,16 @@ export default function CataloguePage() {
             try {
                 const res = await fetch('/api/catalogue');
                 const data = await res.json();
+<<<<<<< HEAD
                 if (Array.isArray(data)) {
                     setItems(data);
                 } else {
                     console.error('Catalogue data is not an array:', data);
                     setItems([]);
                 }
+=======
+                setItems(Array.isArray(data) ? data : []);
+>>>>>>> origin/master
             } catch (error) {
                 console.error('Failed to fetch catalogue items', error);
                 setItems([]);
@@ -40,18 +45,12 @@ export default function CataloguePage() {
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px] -z-10" />
 
             <div className="max-w-7xl mx-auto space-y-16 relative">
-
-                {/* Header Navigation */}
-                <div className="flex justify-between items-center">
-                    <Link href="/portfolio" className="group flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-black dark:hover:text-white transition-colors">
-                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                        Retour au portfolio
-                    </Link>
+                <PageHeader>
                     <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
                         <Sparkles className="w-3 h-3" />
                         Catalogue Premium
                     </div>
-                </div>
+                </PageHeader>
 
                 <div className="space-y-6">
                     <h1 className="text-5xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tight">

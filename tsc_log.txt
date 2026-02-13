@@ -1,0 +1,25 @@
+playwright.config.ts(1,30): error TS2307: Cannot find module '@playwright/test' or its corresponding type declarations.
+src/app/api/game/generate-pdf/route.ts(49,23): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(text: string, x?: number | undefined, y?: number | undefined, options?: TextOptions | undefined): PDFDocument', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type 'string'.
+  Overload 2 of 2, '(text: string, options?: TextOptions | undefined): PDFDocument', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type 'string'.
+src/app/api/game/generate-pdf/route.ts(55,32): error TS18046: 'report' is of type 'unknown'.
+src/app/api/game/generate-pdf/route.ts(55,72): error TS18046: 'report' is of type 'unknown'.
+src/app/api/game/generate-pdf/route.ts(76,23): error TS18046: 'report' is of type 'unknown'.
+src/app/api/game/generate-pdf/route.ts(81,13): error TS18046: 'report' is of type 'unknown'.
+src/app/api/game/generate-pdf/route.ts(81,38): error TS7006: Parameter 'section' implicitly has an 'any' type.
+src/app/api/game/generate-pdf/route.ts(92,42): error TS7006: Parameter 'bullet' implicitly has an 'any' type.
+src/app/api/game/generate-pdf/route.ts(103,17): error TS18046: 'report' is of type 'unknown'.
+src/app/api/game/generate-pdf/route.ts(116,27): error TS18046: 'report' is of type 'unknown'.
+src/app/api/voice/transcribe/route.ts(2,20): error TS2307: Cannot find module 'openai' or its corresponding type declarations.
+src/components/chat/MessageBubble.tsx(4,27): error TS2307: Cannot find module 'react-markdown' or its corresponding type declarations.
+src/components/chat/MessageBubble.tsx(5,23): error TS2307: Cannot find module 'remark-gfm' or its corresponding type declarations.
+src/components/game/QRHandoff.tsx(1,27): error TS2307: Cannot find module 'qrcode.react' or its corresponding type declarations.
+src/hooks/use-game.tsx(60,25): error TS2339: Property 'loading' does not exist on type 'GameState'.
+src/lib/crawler.ts(3,23): error TS2307: Cannot find module 'puppeteer' or its corresponding type declarations.
+src/lib/llm.ts(2,20): error TS2307: Cannot find module 'openai' or its corresponding type declarations.
+src/lib/tools/browser.ts(1,23): error TS2307: Cannot find module 'puppeteer' or its corresponding type declarations.
+src/lib/tools/browser.ts(21,29): error TS7006: Parameter 'req' implicitly has an 'any' type.
+tests/pdf.spec.ts(1,30): error TS2307: Cannot find module '@playwright/test' or its corresponding type declarations.
+tests/pdf.spec.ts(3,53): error TS7031: Binding element 'request' implicitly has an 'any' type.

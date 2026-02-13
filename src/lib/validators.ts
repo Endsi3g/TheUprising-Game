@@ -29,6 +29,7 @@ export const StartSessionSchema = z.object({
 export const SendMessageSchema = z.object({
     message: z.string().min(1).max(5000),
     voiceTranscript: z.string().optional(),
+    imageDataUrl: z.string().startsWith('data:image/').max(3_000_000).optional(),
     meta: z
         .object({
             site_url: z.string().url().optional(),
@@ -72,6 +73,7 @@ export const ChatRequestSchema = z.object({
     niche: z.string().optional().default('General'),
     language: LanguageSchema.optional().default('fr'),
     sessionId: z.string().uuid().optional(),
+    imageDataUrl: z.string().startsWith('data:image/').max(3_000_000).optional(),
 });
 
 export const ReportSectionSchema = z.object({
@@ -108,6 +110,8 @@ export const GeneratePdfSchema = z.union([
 export const ContactSchema = z.object({
     firstName: z.string().min(2),
     email: z.string().email(),
+    tenantId: z.string().uuid().optional(),
+    sessionId: z.string().uuid().optional(),
     companyName: z.string().optional(),
     projectType: z.enum(['audit', 'startup', 'portfolio', 'other']),
     message: z.string().min(10),
