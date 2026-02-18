@@ -3,6 +3,8 @@ import path from 'path';
 import Link from 'next/link';
 import { ArrowLeft, Sparkles, Zap, Bug, Settings, Book, History } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 interface ChangeEntry {
     type: string;
     scope?: string;
@@ -32,7 +34,8 @@ function parseChangelog(content: string): Version[] {
     let currentVersion: Version | null = null;
     let currentSection: { title: string; changes: string[] } | null = null;
 
-    for (const line of lines) {
+    for (let line of lines) {
+        line = line.trim();
         const versionMatch = line.match(/^## \[(.*?)\] - (.*?)$/);
         if (versionMatch) {
             if (currentVersion) versions.push(currentVersion);
@@ -55,8 +58,8 @@ function parseChangelog(content: string): Version[] {
             continue;
         }
 
-        if (line.trim().startsWith('- ') && currentSection) {
-            currentSection.changes.push(line.trim().substring(2));
+        if (line.startsWith('- ') && currentSection) {
+            currentSection.changes.push(line.substring(2));
         }
     }
 
