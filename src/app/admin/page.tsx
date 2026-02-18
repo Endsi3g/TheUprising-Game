@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Activity, CheckCircle, Target, TrendingUp, Users, MessageSquare } from 'lucide-react';
+import { Activity, CheckCircle, Target, TrendingUp, Users, type LucideIcon } from 'lucide-react';
 import { TENANT_ID } from '@/lib/config';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -40,10 +40,7 @@ export default function AdminOverviewPage() {
 
     // Data Fetch
     useEffect(() => {
-        if (!user || !session) {
-            if (!authLoading) setLoading(false);
-            return;
-        }
+        if (!user || !session) return;
 
         fetch(`/api/admin/overview?tenantId=${TENANT_ID}`, {
             headers: {
@@ -148,7 +145,7 @@ export default function AdminOverviewPage() {
 
 // ─── Components ───────────────────────────────────────────────────────────────
 
-function KpiCard({ title, value, icon: Icon, color }: { title: string; value: string | number; icon: any; color: string }) {
+function KpiCard({ title, value, icon: Icon, color }: { title: string; value: string | number; icon: LucideIcon; color: string }) {
     return (
         <Card className="shadow-sm border-border-light dark:border-border-dark bg-white dark:bg-surface-dark hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

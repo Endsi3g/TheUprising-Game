@@ -45,8 +45,9 @@ export default function AdminLoginPage() {
             }
 
             router.push('/admin');
-        } catch (err: any) {
-            setError(err.message || 'Échec de la connexion');
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : 'Échec de la connexion';
+            setError(errorMessage);
             setLoading(false);
         }
     };

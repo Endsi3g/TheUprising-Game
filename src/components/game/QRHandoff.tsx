@@ -2,15 +2,15 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useEffect, useState } from 'react';
 
 export default function QRHandoff() {
-    const [url, setUrl] = useState('');
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            setUrl(window.location.href);
-        }
+        setMounted(true);
     }, []);
 
-    if (!url) return null;
+    if (!mounted) return null;
+
+    const url = window.location.href;
 
     return (
         <div className="p-4 bg-white dark:bg-white rounded-xl shadow-lg inline-block">

@@ -33,24 +33,28 @@ const VOICE_STYLE_INSTRUCTIONS: Record<string, { fr: string; en: string }> = {
 
 const MODE_INSTRUCTIONS: Record<SessionMode, { fr: string; en: string }> = {
     startup: {
-        fr: `--- RÔLE : MENTOR / CO-FONDATEUR ---
-D'abord, tu dois COMPRENDRE avant de conseiller.
-PHASE 1 : INVESTIGATION (3-5 questions)
-- Pose des questions précises sur la vision, le budget, les peurs et les forces uniques de [Nom de l'entreprise].
-- Ne donne PAS de plan tout de suite. Creuse les réponses.
-- Cherche la "sauce secrète" du fondateur.
+        fr: `--- RÔLE : MENTOR & STRATÈGE EN CRÉATION D'ENTREPRISE ---
+Ton objectif est d'aider l'utilisateur à BÂTIR et AMÉLIORER son concept d'entreprise de A à Z.
 
-PHASE 2 : PLAN D'ACTION (Rapport final)
-- Une fois que tu as une clarté totale, signale [READY_FOR_REPORT].`,
-        en: `--- ROLE: MENTOR / CO-FOUNDER ---
-First, you must UNDERSTAND before advising.
-PHASE 1: INVESTIGATION (3-5 questions)
-- Ask precise questions about vision, budget, fears, and unique strengths.
-- Do NOT give a plan yet. Dig into the answers.
-- Look for the founder's "secret sauce".
+PHASE 1 : CO-CONCEPTION (Interactif)
+- Pose des questions ciblées pour définir : la Vision, le Problème résolu, la Cible, et le Modèle de revenus.
+- Challenge les idées de l'utilisateur : "Et si on ajoutait X ?", "Comment vas-tu te différencier de Y ?".
+- Ne donne pas de plan global tout de suite. Construis brique par brique.
 
-PHASE 2: ACTION PLAN (Final Report)
-- Once you have total clarity, signal [READY_FOR_REPORT].`,
+PHASE 2 : OPTIMISATION & SCALE
+- Propose des améliorations concrètes sur le marketing, l'opérationnel ou le produit.
+- Une fois que le concept est solide et "prêt à lancer", signale [READY_FOR_REPORT].`,
+        en: `--- ROLE: BUSINESS CREATION MENTOR & STRATEGIST ---
+Your goal is to help the user BUILD and IMPROVE their business concept from scratch.
+
+PHASE 1: CO-DESIGN (Interactive)
+- Ask targeted questions to define: Vision, Problem solved, Target audience, and Revenue model.
+- Challenge the user's ideas: "What if we added X?", "How will you differentiate from Y?".
+- Do not give a global plan immediately. Build brick by brick.
+
+PHASE 2: OPTIMIZATION & SCALE
+- Propose concrete improvements on marketing, operations, or product.
+- Once the concept is solid and "ready to launch", signal [READY_FOR_REPORT].`,
     },
     portfolio: {
         fr: `--- RÔLE : DIRECTEUR DE CRÉATION ---
@@ -200,8 +204,8 @@ export function buildReportPrompt(opts: {
 
     // Agency CTA Logic
     const agencyCtaInstruction = language === 'fr'
-        ? `Le champ "cta" DOIT être une invitation irrésistible à passer à l'action avec l'agence "Uprising".\nExemple : "Prêt à implémenter ce plan ? Prenez rendez-vous avec l'agence Uprising pour accélérer votre croissance."\nNe propose PAS de le faire toi-même, renvoie vers l'agence.`
-        : `The "cta" field MUST be an irresistible invitation to take action with "Uprising" agency.\nExample: "Ready to implement this plan? Book a call with Uprising Agency to accelerate your growth."\nDo NOT offer to do it yourself, refer to the agency.`;
+        ? `Le champ "cta" DOIT être une invitation irrésistible à passer à l'action avec l'agence "Uprising".\nUtilise ces liens dans ton texte si possible :\n- Agence : https://swift-buttons-558188.framer.app/\n- Portfolio : https://swift-buttons-558188.framer.app/works\nExemple : "Prêt à implémenter ce plan ? Contactez l'agence Uprising pour accélérer votre croissance ou allez voir mon portfolio."`
+        : `The "cta" field MUST be an irresistible invitation to take action with "Uprising" agency.\nUse these links in your text if possible:\n- Agency: https://swift-buttons-558188.framer.app/\n- Portfolio: https://swift-buttons-558188.framer.app/works\nExample: "Ready to implement this plan? Contact Uprising Agency to accelerate your growth or check out my portfolio."`;
 
     return `${language === 'fr' ? 'Génère' : 'Generate'} a structured report in ${lang} based on the following conversation.
 

@@ -11,7 +11,11 @@ export interface AgentResult {
     insights: string[];
     score?: number; // 0-100 score for this specific domain
     recommendations: string[];
-    raw?: any; // Agent-specific raw data
+    /**
+     * Agent-specific raw data.
+     * For 'researcher', this is typically CrawlResult.
+     */
+    raw?: CrawlResult | Record<string, unknown>;
 }
 
 /**

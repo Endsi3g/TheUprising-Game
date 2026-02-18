@@ -132,12 +132,6 @@ export function ConversationPanel() {
     useEffect(() => {
         if (transcript) {
             setInput((prev) => (prev ? prev + ' ' : '') + transcript);
-            // resetTranscript(); // Move this out of the sync loop if it triggers render
-        }
-    }, [transcript]);
-
-    useEffect(() => {
-        if (transcript) {
             resetTranscript();
         }
     }, [transcript, resetTranscript]);

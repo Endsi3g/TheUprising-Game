@@ -23,9 +23,6 @@ export abstract class Agent {
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error("Missing GEMINI_API_KEY");
 
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
         const systemPrompt = `
       You are ${this.config.name}, a world-class ${this.config.role}.
       GOAL: ${this.config.goal}
@@ -34,7 +31,13 @@ export abstract class Agent {
       Analyze the provided data and return insights.
     `;
 
-        const result = await model.generateContent([systemPrompt, prompt]);
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-2.0-flash",
+            systemInstruction: systemPrompt 
+        });
+
+        const result = await model.generateContent(prompt);
         return result.response.text();
     }
 }
