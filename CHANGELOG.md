@@ -5,6 +5,13 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère à la [Gestion Sémantique de Version](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-02-18
+
+### feat(ui): integrate changelog into the application
+- Create `/changelog` page that automatically parses and displays `CHANGELOG.md`.
+- Add "Nouveautés" link with Sparkles icon to the home page footer.
+- Map technical tags (feat, fix, etc.) to user-friendly French labels (Nouveauté, Correction, etc.).
+
 ## [1.1.0] - 2026-02-18
 
 ### feat(ai): enhance AI agents and startup mode
