@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, User, Share2, MessageSquare, Heart, Bookmark, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Share2, MessageSquare, Heart, Bookmark, ChevronRight, ArrowRight } from 'lucide-react';
 
 export default function BlogPostPage() {
     const params = useParams();

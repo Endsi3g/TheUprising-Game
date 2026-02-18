@@ -43,9 +43,9 @@ REM ─────────────────────────�
 REM  3. Fichier .env
 REM ──────────────────────────────────────────────────────────
 echo [3/4] Vérification du fichier .env...
-if not exist "%~dp0.env" (
-    if exist "%~dp0.env.example" (
-        copy "%~dp0.env.example" "%~dp0.env" >nul
+if not exist "%~dp0..\.env" (
+    if exist "%~dp0..\.env.example" (
+        copy "%~dp0..\.env.example" "%~dp0..\.env" >nul
         echo     ⚠️  Fichier .env créé à partir de .env.example.
         echo     👉  IMPORTANT : ouvre le fichier .env et remplis tes clés API avant de continuer.
         echo.
@@ -67,7 +67,7 @@ REM ─────────────────────────�
 echo [4/4] Installation des dépendances (npm install)...
 echo     Cela peut prendre quelques minutes...
 echo.
-cd /d "%~dp0"
+cd /d "%~dp0.."
 call npm install
 if %ERRORLEVEL% NEQ 0 (
     echo.
