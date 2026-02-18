@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { LayoutGrid, BrainCircuit, ArrowRight, MousePointerClick, Moon, Sun, Settings } from 'lucide-react';
+import { LayoutGrid, BrainCircuit, ArrowRight, MousePointerClick, Moon, Sun, Settings, Sparkles } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -85,10 +85,16 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full px-8 py-6 flex justify-between items-center text-xs text-gray-400 dark:text-gray-500 z-10">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-          <span>Système opérationnel</span>
+      <footer className="w-full px-8 py-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400 dark:text-gray-500 z-10 gap-4">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            <span>Système opérationnel</span>
+          </div>
+          <Link href="/changelog" className="flex items-center gap-1.5 hover:text-gray-900 dark:hover:text-white transition-colors group">
+            <Sparkles className="w-3 h-3 text-amber-500 group-hover:scale-110 transition-transform" />
+            <span>Nouveautés</span>
+          </Link>
         </div>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">

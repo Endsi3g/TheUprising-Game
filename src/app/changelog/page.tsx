@@ -28,8 +28,7 @@ const TYPE_MAP: Record<string, { label: string; icon: any; color: string }> = {
 
 function parseChangelog(content: string): Version[] {
     const versions: Version[] = [];
-    const lines = content.split('
-');
+    const lines = content.split('\n');
     let currentVersion: Version | null = null;
     let currentSection: { title: string; changes: string[] } | null = null;
 
